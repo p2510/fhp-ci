@@ -183,6 +183,8 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.js"></script>
     <!-- SweetAlert2 -->
     <link rel="stylesheet" href="./../plugins/sweetalert2/sweetalert2.min.css">
+
+    <script src="./pwa/js/script.js"></script>
 </head>
 
 <body class="hold-transition sidebar-mini">
