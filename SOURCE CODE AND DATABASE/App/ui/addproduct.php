@@ -530,8 +530,8 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
 
                                                         <button type="submit" class="btn btn-primary"
                                                             name="btnsave">Enregistrer Producteur</button>
-                                                        <button type="button"
-                                                            class="btn btn-success synchchro">Synchroniser
+                                                        <button type="button" class="btn btn-success "
+                                                            id="synchchro">Synchroniser
                                                         </button>
                                                     </div>
                                                 </div>
@@ -572,21 +572,22 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
     <script>
     function saveFormOffline() {
 
-        const form = document.getElementById('producteur-form');
+        const form = document.getElementById(' producteur-form');
         const formData = new FormData(form);
-
-
         const data = {};
         formData.forEach((value, key) => {
             data[key] = value;
         });
 
-        // Récupérer les données déjà stockées ou initialiser un tableau vide
-        const offlineForms = JSON.parse(localStorage.getItem('offlineForms')) || [];
+        // Récupérer les données déjà stockées ou initialiser un
+        tableau vide
+        const offlineForms =
+            JSON.parse(localStorage.getItem('offlineForms')) || [];
         offlineForms.push(data);
 
         // Sauvegarder les données mises à jour dans localStorage
-        localStorage.setItem('offlineForms', JSON.stringify(offlineForms));
+        localStorage.setItem('offlineForms',
+            JSON.stringify(offlineForms));
 
 
 
@@ -597,47 +598,53 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
     document.addEventListener("DOMContentLoaded", function() {
 
         // Initialisation de Signature Pad
-        const signaturePad = new SignaturePad(document.getElementById('signature-pad'));
+        const signaturePad = new
+        SignaturePad(document.getElementById('signature-pad'));
 
 
 
         // Ciblez le formulaire par son ID
-        document.getElementById("producteur-form").addEventListener("submit", function(event) {
+        document.getElementById("producteur-form").addEventListener("submit",
+            function(event) {
 
-            // Empêche l'envoi du formulaire
+                // Empêche l'envoi du formulaire
 
-            if (!signaturePad.isEmpty()) {
-                const dataURL = signaturePad.toDataURL();
-                document.getElementById('signature_image').value = dataURL;
-            } else {
-                alert("Veuillez signer avant d'enregistrer.");
-                event.preventDefault(); // Empêche la soumission si la signature est manquante
-            }
+                if (!signaturePad.isEmpty()) {
+                    const dataURL = signaturePad.toDataURL();
+                    document.getElementById('signature_image').value = dataURL;
+                } else {
+                    alert("Veuillez signer avant d'enregistrer.");
+                    event.preventDefault(); // Empêche la soumission si la
+                    signature est manquante
+                }
 
 
-            const form = document.getElementById('producteur-form');
-            event.preventDefault();
-            saveFormOffline();
-            /*if (navigator.onLine) {
+                const form = document.getElementById('producteur-form');
+                event.preventDefault();
+                saveFormOffline();
+                /*if (navigator.onLine) {
 
-            } else {
+                } else {
 
                 event.preventDefault();
-                saveFormOffline(); // Sauvegarde hors ligne si pas de connexion réelle
-            }*/
+                saveFormOffline(); // Sauvegarde hors ligne si pas de
+                connexion réelle
+                }*/
 
-        });
+            });
 
         // Effacer la signature
-        document.getElementById('clear-signature').addEventListener('click', function() {
-            signaturePad.clear();
-        });
+        document.getElementById('clear-signature').addEventListener('click',
+            function() {
+                signaturePad.clear();
+            });
     });
 
 
     // Fonction pour synchroniser les données avec le serveur
     async function syncForms() {
-        const offlineForms = JSON.parse(localStorage.getItem('offlineForms')) || [];
+        const offlineForms =
+            JSON.parse(localStorage.getItem('offlineForms')) || [];
 
         if (offlineForms.length > 0) {
             try {
@@ -650,7 +657,8 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
                 });
 
                 if (response.ok) {
-                    // Si la synchronisation est réussie, vider le stockage local
+                    // Si la synchronisation est réussie, vider le stockage
+                    local
                     localStorage.removeItem('offlineForms');
                     alert('Formulaires synchronisés avec succès !');
                 } else {
@@ -664,38 +672,43 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
 
 
     // Gérer la génération du code producteur
-    document.getElementById('secteur_selector').addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        const secteur_code = selectedOption.getAttribute('data-secteur_code');
+    document.getElementById('secteur_selector').addEventListener('change',
+        function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const secteur_code =
+                selectedOption.getAttribute('data-secteur_code');
 
-        if (secteur_code) {
-            // Générer les 7 chiffres aléatoires
-            const randomDigits = Math.floor(1000000 + Math.random() * 9000000);
-            const producteurCode = secteur_code +
-                randomDigits; // Combinaison du code secteur et des chiffres aléatoires
+            if (secteur_code) {
+                // Générer les 7 chiffres aléatoires
+                const randomDigits = Math.floor(1000000 + Math.random() *
+                    9000000);
+                const producteurCode = secteur_code +
+                    randomDigits; // Combinaison du code secteur et des chiffres
+                aléatoires
 
-            // Mettre à jour la valeur du champ producteur_code pour afficher le code généré
-            document.getElementById('producteur_code').value = producteurCode;
+                // Mettre à jour la valeur du champ producteur_code pour
+                afficher le code généré
+                document.getElementById('producteur_code').value =
+                    producteurCode;
 
-            // Remplir également le champ caché txtsecteur_code
-            document.getElementById('txtsecteur_code').value = secteur_code;
-        }
-    });
+                // Remplir également le champ caché txtsecteur_code
+                document.getElementById('txtsecteur_code').value =
+                    secteur_code;
+            }
+        });
     // Vérification de la connexion toutes les 30 min
 
-    document.getElementById('synchchro').addEventListener('click', () => {
-        if (navigator.onLine) {
-            alert('Synchronisation des données...')
-            syncForms();
-        } else {
-            alert('Aucune connexion Internet détectée. Les données ne peuvent pas être synchronisées.');
-        }
-    })
+    document.getElementById('synchchro').addEventListener('click',
+        function {
+            if (navigator.onLine) {
+                alert('Synchronisation des données...')
+                syncForms();
+            } else {
+                alert('Aucune connexion Internet détectée. Les données ne peuvent pas être synchronisées.');
+            }
+        })
 
-    let = () => {
 
-
-    }
     setInterval(() => {
         if (navigator.onLine) {
 
@@ -708,30 +721,42 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
     <!-- jQuery -->
     <script src="./../plugins/jquery/jquery.min.js"></script>
     <!-- Bootstrap 4 -->
-    <script src="./../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="./../plugins/bootstrap/js/bootstrap.bundle.min.js">
+    </script>
 
 
     <!-- Select2 -->
-    <script src="./../plugins/select2/js/select2.full.min.js"></script>
+    <script src="./../plugins/select2/js/select2.full.min.js">
+    </script>
 
     <!-- AdminLTE App -->
     <script src="./../dist/js/adminlte.min.js"></script>
-    <script src="./../plugins/datatables/jquery.dataTables.min.js"></script>
-    <script src="./../plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-    <script src="./../plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-    <script src="./../plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-    <script src="./../plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
-    <script src="./../plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+    <script src="./../plugins/datatables/jquery.dataTables.min.js">
+    </script>
+    <script src="./../plugins/datatables-bs4/js/dataTables.bootstrap4.min.js">
+    </script>
+    <script src="./../plugins/datatables-responsive/js/dataTables.responsive.min.js">
+    </script>
+    <script src="./../plugins/datatables-responsive/js/responsive.bootstrap4.min.js">
+    </script>
+    <script src="./../plugins/datatables-buttons/js/dataTables.buttons.min.js">
+    </script>
+    <script src="./../plugins/datatables-buttons/js/buttons.bootstrap4.min.js">
+    </script>
     <script src="./../plugins/jszip/jszip.min.js"></script>
     <script src="./../plugins/pdfmake/pdfmake.min.js"></script>
     <script src="./../plugins/pdfmake/vfs_fonts.js"></script>
-    <script src="./../plugins/datatables-buttons/js/buttons.html5.min.js"></script>
-    <script src="./../plugins/datatables-buttons/js/buttons.print.min.js"></script>
-    <script src="./../plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+    <script src="./../plugins/datatables-buttons/js/buttons.html5.min.js">
+    </script>
+    <script src="./../plugins/datatables-buttons/js/buttons.print.min.js">
+    </script>
+    <script src="./../plugins/datatables-buttons/js/buttons.colVis.min.js">
+    </script>
 
 
     <!-- SweetAlert2 -->
-    <script src="./../plugins/sweetalert2/sweetalert2.min.js"></script>
+    <script src="./../plugins/sweetalert2/sweetalert2.min.js">
+    </script>
 </body>
 
 </html>
