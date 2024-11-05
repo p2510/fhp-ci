@@ -501,7 +501,7 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
                                                         <div class="form-group">
                                                             <label>Photo</label>
                                                             <input type="file" class="form-control" name="photo"
-                                                                accept="image/*">
+                                                                id="photo-input" accept="image/*">
                                                         </div>
 
                                                         <div class="form-group">
@@ -531,7 +531,7 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
                                                         <button type="submit" class="btn btn-primary"
                                                             name="btnsave">Enregistrer Producteur</button>
                                                         <button type="button" class="btn btn-success "
-                                                            id="synchchro">Synchroniser
+                                                            id="synchro">Synchroniser
                                                         </button>
                                                     </div>
                                                 </div>
@@ -569,151 +569,146 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
     </div>
 
 
+
     <script>
+    // Function to save the form data offline when there is no internet connection
     function saveFormOffline() {
+        const form = document.getElementById('producteur-form'); // Get the form element
+        const formData = new FormData(form); // Create a FormData object from the form
+        const photoInput = document.getElementById('photo-input'); // Get the photo input element
+        const data = {}; // Initialize an empty object to store form data
 
-        const form = document.getElementById(' producteur-form');
-        const formData = new FormData(form);
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
-        });
+        // Check if a photo file is selected
+        if (photoInput.files.length > 0) {
+            const file = photoInput.files[0]; // Get the first file from the input
+            console.log(photoInput.files[0]); // Log the selected file to the console
+            const reader = new FileReader(); // Create a FileReader object
 
-        // Récupérer les données déjà stockées ou initialiser un
-        tableau vide
-        const offlineForms =
-            JSON.parse(localStorage.getItem('offlineForms')) || [];
-        offlineForms.push(data);
-
-        // Sauvegarder les données mises à jour dans localStorage
-        localStorage.setItem('offlineForms',
-            JSON.stringify(offlineForms));
-
-
-
-        alert('Formulaire sauvegardé hors ligne !');
-        form.reset(); // Réinitialiser le formulaire
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-
-        // Initialisation de Signature Pad
-        const signaturePad = new
-        SignaturePad(document.getElementById('signature-pad'));
-
-
-
-        // Ciblez le formulaire par son ID
-        document.getElementById("producteur-form").addEventListener("submit",
-            function(event) {
-
-                // Empêche l'envoi du formulaire
-
-                if (!signaturePad.isEmpty()) {
-                    const dataURL = signaturePad.toDataURL();
-                    document.getElementById('signature_image').value = dataURL;
-                } else {
-                    alert("Veuillez signer avant d'enregistrer.");
-                    event.preventDefault(); // Empêche la soumission si la
-                    signature est manquante
-                }
-
-
-                const form = document.getElementById('producteur-form');
-                event.preventDefault();
-                saveFormOffline();
-                /*if (navigator.onLine) {
-
-                } else {
-
-                event.preventDefault();
-                saveFormOffline(); // Sauvegarde hors ligne si pas de
-                connexion réelle
-                }*/
-
-            });
-
-        // Effacer la signature
-        document.getElementById('clear-signature').addEventListener('click',
-            function() {
-                signaturePad.clear();
-            });
-    });
-
-
-    // Fonction pour synchroniser les données avec le serveur
-    async function syncForms() {
-        const offlineForms =
-            JSON.parse(localStorage.getItem('offlineForms')) || [];
-
-        if (offlineForms.length > 0) {
-            try {
-                const response = await fetch('syncForms.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(offlineForms)
+            // This function is called when the file reading is complete
+            reader.onloadend = function() {
+                // Add the form data to the object
+                formData.forEach((value, key) => {
+                    data[key] = value; // Store each form field in the data object
                 });
 
-                if (response.ok) {
-                    // Si la synchronisation est réussie, vider le stockage
-                    local
-                    localStorage.removeItem('offlineForms');
-                    alert('Formulaires synchronisés avec succès !');
+                const base64String = reader.result; // Get the Base64 string from the reader
+                console.log(base64String); // Log the Base64 string to the console
+
+                // Add the photo converted to Base64 to the data object
+                data['photo'] = base64String;
+                console.log(data['photo']); // Log the photo data to the console
+
+                // Now that the photo is ready, store the data in localStorage
+                const offlineForms = JSON.parse(localStorage.getItem('offlineForms')) ||
+            []; // Get existing offline forms from localStorage
+                offlineForms.push(data); // Add the current form data to the array
+                localStorage.setItem('offlineForms', JSON.stringify(
+                    offlineForms)); // Store the updated array back in localStorage
+
+                alert(
+                    'Formulaire sauvegardé hors ligne !'); // Alert the user that the form has been saved offline
+                form.reset(); // Reset the form for new entries
+            };
+
+            reader.readAsDataURL(file); // Convert the file to Base64
+        } else {
+            console.log("Aucune photo sélectionnée."); // Log a message if no photo is selected
+        }
+    }
+
+    // Event listener for when the DOM is fully loaded
+    document.addEventListener("DOMContentLoaded", function() {
+        const signaturePad = new SignaturePad(document.getElementById(
+            'signature-pad')); // Initialize the signature pad
+
+        // Event listener for the form submission
+        document.getElementById("producteur-form").addEventListener("submit", function(event) {
+            if (signaturePad.isEmpty()) { // Check if the signature pad is empty
+                alert("Veuillez signer avant d'enregistrer."); // Alert if signature is missing
+                event.preventDefault(); // Prevent form submission
+                return; // Exit the function if no signature
+            }
+
+            const dataURL = signaturePad.toDataURL(); // Get the signature as a data URL
+            document.getElementById('signature_image').value =
+                dataURL; // Set the data URL in a hidden input field
+            alert('jhj'); // Log a message (this might need clarification or removal)
+            event.preventDefault(); // Prevent the form from being sent
+            saveFormOffline(); // Call the function to save the form offline
+        });
+
+        // Event listener to clear the signature pad
+        document.getElementById('clear-signature').addEventListener('click', function() {
+            signaturePad.clear(); // Clear the signature pad
+        });
+    });
+
+    // Function to synchronize the offline form data with the server
+    async function syncForms() {
+        const offlineForms = JSON.parse(localStorage.getItem('offlineForms')) ||
+    []; // Retrieve offline forms from localStorage
+
+        if (offlineForms.length > 0) { // Check if there are any offline forms to sync
+            try {
+                const response = await fetch('syncForms.php', { // Send a POST request to syncForms.php
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json' // Set the content type to JSON
+                    },
+                    body: JSON.stringify(offlineForms) // Send the offline forms as JSON
+                });
+
+                if (response.ok) { // Check if the response is OK
+                    localStorage.removeItem('offlineForms'); // Clear localStorage after successful sync
+                    alert(
+                        'Formulaires synchronisés avec succès !'); // Alert that the forms were successfully synced
                 } else {
-                    alert('Erreur lors de la synchronisation des formulaires.');
+                    alert(
+                        'Erreur lors de la synchronisation des formulaires.'); // Alert in case of error during sync
                 }
             } catch (error) {
-                console.error('Erreur:', error);
+                console.error('Erreur:', error); // Log any errors encountered during the fetch
             }
         }
     }
 
+    // Event listener to handle producer code generation based on sector selection
+    document.getElementById('secteur_selector').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex]; // Get the selected option
+        const secteur_code = selectedOption.getAttribute(
+            'data-secteur_code'); // Get the data attribute for sector code
 
-    // Gérer la génération du code producteur
-    document.getElementById('secteur_selector').addEventListener('change',
-        function() {
-            const selectedOption = this.options[this.selectedIndex];
-            const secteur_code =
-                selectedOption.getAttribute('data-secteur_code');
-
-            if (secteur_code) {
-                // Générer les 7 chiffres aléatoires
-                const randomDigits = Math.floor(1000000 + Math.random() *
-                    9000000);
-                const producteurCode = secteur_code +
-                    randomDigits; // Combinaison du code secteur et des chiffres
-                aléatoires
-
-                // Mettre à jour la valeur du champ producteur_code pour
-                afficher le code généré
-                document.getElementById('producteur_code').value =
-                    producteurCode;
-
-                // Remplir également le champ caché txtsecteur_code
-                document.getElementById('txtsecteur_code').value =
-                    secteur_code;
-            }
-        });
-    // Vérification de la connexion toutes les 30 min
-
-    document.getElementById('synchchro').addEventListener('click',
-        function {
-            if (navigator.onLine) {
-                alert('Synchronisation des données...')
-                syncForms();
-            } else {
-                alert('Aucune connexion Internet détectée. Les données ne peuvent pas être synchronisées.');
-            }
-        })
-
-
-    setInterval(() => {
-        if (navigator.onLine) {
-
+        if (secteur_code) {
+            const randomDigits = Math.floor(1000000 + Math.random() * 9000000); // Generate random digits
+            const producteurCode = secteur_code + randomDigits; // Combine sector code with random digits
+            document.getElementById('producteur_code').value =
+                producteurCode; // Set the producer code input value
+            document.getElementById('txtsecteur_code').value =
+                secteur_code; // Fill the hidden field with the sector code
         }
-    }, 1800000); // Vérifie toutes les 30 min
+    });
+
+    // Event listener to check connection and synchronize data on button click
+    document.getElementById('synchro').addEventListener('click', function() {
+        if (navigator.onLine) { // Check if the browser is online
+            alert('Synchronisation des données...'); // Alert the user that synchronization is starting
+            syncForms(); // Call the function to synchronize forms
+        } else {
+            alert(
+                'Aucune connexion Internet détectée. Les données ne peuvent pas être synchronisées.'
+                ); // Alert if no internet
+            connection is detected
+        }
+    });
+
+    // Check the connection every 30 minutes
+    setInterval(() => {
+        if (navigator.onLine) { // If online
+            syncForms(); // Synchronize forms if online
+        }
+    }, 1800000); // Check every 30 minutes (1800000 milliseconds)
+    </script>
+
     </script>
 
 
