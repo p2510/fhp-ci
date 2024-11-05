@@ -36,7 +36,7 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
     // Gérer l'upload de la photo
     $photo_name = $producteur_code . '.jpg';
     $photo_tmp = $_FILES['photo']['tmp_name'];
-    $photo_path = "uploads/" . $photo_name; // Assurez-vous que le dossier 'uploads' existe et est accessible en écriture 
+    $photo_path = "uploads/" . $photo_name; // Assurez-vous que le dossier 'uploads' existe et est accessible en écriture
 
     if (move_uploaded_file($photo_tmp, $photo_path)) {
         $_SESSION['status'] = "Photo téléchargée avec succès";
@@ -380,12 +380,12 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
                                                                 <option value="" disabled selected>Choisissez un
                                                                     secteur</option>
                                                                 <?php
-                                                                        $select = $pdo->prepare("SELECT * FROM tbl_secteurs ORDER BY secteur_id DESC");
-                                                                        $select->execute();
-                                                                        while ($row = $select->fetch(PDO::FETCH_ASSOC)) {
-                                                                        echo '<option value="' . $row['secteur_name'] . '" data-secteur_code="' . $row['secteur_code'] . '">' . $row['secteur_name'] . '</option>';
-                                                                        }
-                                                                        ?>
+                        $select = $pdo->prepare("SELECT * FROM tbl_secteurs ORDER BY secteur_id DESC");
+                        $select->execute();
+                        while ($row = $select->fetch(PDO::FETCH_ASSOC)) {
+                          echo '<option value="' . $row['secteur_name'] . '" data-secteur_code="' . $row['secteur_code'] . '">' . $row['secteur_name'] . '</option>';
+                        }
+                        ?>
                                                             </select>
                                                             <input type="hidden" id="txtsecteur_code"
                                                                 name="txtsecteur_code">
@@ -525,15 +525,9 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
                                                     </div>
                                                 </div>
 
-                                                <div class="card-footer col-md-6">
-                                                    <div class="form-group">
-
-                                                        <button type="submit" class="btn btn-primary"
-                                                            name="btnsave">Enregistrer Producteur</button>
-                                                        <button type="button"
-                                                            class="btn btn-success synchchro">Synchroniser
-                                                        </button>
-                                                    </div>
+                                                <div class="card-footer">
+                                                    <button type="submit" class="btn btn-primary"
+                                                        name="btnsave">Enregistrer Producteur</button>
                                                 </div>
                                         </form>
                                     </div>
@@ -570,42 +564,12 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
 
 
     <script>
-    function saveFormOffline() {
-
-        const form = document.getElementById('producteur-form');
-        const formData = new FormData(form);
-
-
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
-        });
-
-        // Récupérer les données déjà stockées ou initialiser un tableau vide
-        const offlineForms = JSON.parse(localStorage.getItem('offlineForms')) || [];
-        offlineForms.push(data);
-
-        // Sauvegarder les données mises à jour dans localStorage
-        localStorage.setItem('offlineForms', JSON.stringify(offlineForms));
-
-
-
-        alert('Formulaire sauvegardé hors ligne !');
-        form.reset(); // Réinitialiser le formulaire
-    }
-
     document.addEventListener("DOMContentLoaded", function() {
-
         // Initialisation de Signature Pad
         const signaturePad = new SignaturePad(document.getElementById('signature-pad'));
 
-
-
         // Ciblez le formulaire par son ID
         document.getElementById("producteur-form").addEventListener("submit", function(event) {
-
-            // Empêche l'envoi du formulaire
-
             if (!signaturePad.isEmpty()) {
                 const dataURL = signaturePad.toDataURL();
                 document.getElementById('signature_image').value = dataURL;
@@ -613,19 +577,6 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
                 alert("Veuillez signer avant d'enregistrer.");
                 event.preventDefault(); // Empêche la soumission si la signature est manquante
             }
-
-
-            const form = document.getElementById('producteur-form');
-            event.preventDefault();
-            saveFormOffline();
-            /*if (navigator.onLine) {
-
-            } else {
-
-                event.preventDefault();
-                saveFormOffline(); // Sauvegarde hors ligne si pas de connexion réelle
-            }*/
-
         });
 
         // Effacer la signature
@@ -633,34 +584,6 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
             signaturePad.clear();
         });
     });
-
-
-    // Fonction pour synchroniser les données avec le serveur
-    async function syncForms() {
-        const offlineForms = JSON.parse(localStorage.getItem('offlineForms')) || [];
-
-        if (offlineForms.length > 0) {
-            try {
-                const response = await fetch('syncForms.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(offlineForms)
-                });
-
-                if (response.ok) {
-                    // Si la synchronisation est réussie, vider le stockage local
-                    localStorage.removeItem('offlineForms');
-                    alert('Formulaires synchronisés avec succès !');
-                } else {
-                    alert('Erreur lors de la synchronisation des formulaires.');
-                }
-            } catch (error) {
-                console.error('Erreur:', error);
-            }
-        }
-    }
 
 
     // Gérer la génération du code producteur
@@ -681,29 +604,7 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
             document.getElementById('txtsecteur_code').value = secteur_code;
         }
     });
-    // Vérification de la connexion toutes les 30 min
-
-    document.getElementById('synchchro').addEventListener('click', () => {
-        if (navigator.onLine) {
-            alert('Synchronisation des données...')
-            syncForms();
-        } else {
-            alert('Aucune connexion Internet détectée. Les données ne peuvent pas être synchronisées.');
-        }
-    })
-
-    let = () => {
-
-
-    }
-    setInterval(() => {
-        if (navigator.onLine) {
-
-        }
-    }, 1800000); // Vérifie toutes les 30 min
     </script>
-
-
 
     <!-- jQuery -->
     <script src="./../plugins/jquery/jquery.min.js"></script>

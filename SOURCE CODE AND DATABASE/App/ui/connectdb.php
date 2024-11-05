@@ -41,11 +41,6 @@ function sendlog(
   }
 }
 
-
-
 //echo'connection success';
-
-
-
 
 ?>
