@@ -12,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['btnimport'])) {
             $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
 
             foreach ($sheetData as $row) {
+                
                 $barcode = $row['A'];
                 $product = $row['B'];
                 $category = $row['C'];

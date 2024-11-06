@@ -1,8 +1,10 @@
 <?php
 include_once 'connectdb.php';
 session_start();
+include_once 'guard.php';
+AccessGuard::protectPage('category');
 
-if ($_SESSION['useremail'] == '' or $_SESSION['role'] == 'User') {
+if ($_SESSION['useremail'] == '' ) {
     header('location:../index.php');
 }
 
@@ -175,6 +177,7 @@ if (isset($_POST['btndelete'])) {
             <div class="row mb-2">
                 <div class="col-sm-6">
                     <h1 class="m-0">Secteurs</h1>
+
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -312,4 +315,4 @@ unset($_SESSION['status']);
 $(document).ready(function() {
     $('#table_secteur').DataTable();
 }); <
-/script
+</script>

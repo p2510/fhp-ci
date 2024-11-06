@@ -193,6 +193,7 @@ sendlog(
                                     <select class="form-control" name="txtselect_option" required>
                                         <option value="" disabled selected>Définir Role</option>
                                         <option>Admin</option>
+                                        <option>Middle</option>
                                         <option>User</option>
 
                                     </select>
@@ -313,10 +314,10 @@ include_once 'footer.php';
 
 ?>
 <script>
-    Swal.fire({
-        icon: '<?php echo $_SESSION['status_code']; ?>',
-        title: '<?php echo $_SESSION['status']; ?>'
-    });
+Swal.fire({
+    icon: '<?php echo $_SESSION['status_code']; ?>',
+    title: '<?php echo $_SESSION['status']; ?>'
+});
 </script>
 <?php
 unset($_SESSION['status']);

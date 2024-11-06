@@ -71,29 +71,29 @@ sendlog(
                                     $select = $pdo->prepare("SELECT * FROM tbl_producteurs WHERE delegue_village='oui' ORDER BY producteur_id ASC");
                                     $select->execute();
 
-                                    while ($row = $select->fetch(PDO::FETCH_OBJ)) {
-                                        echo '
-<tr>
-<td>' . $row->producteur_code . '</td>
-<td>' . $row->secteur_name . '</td>
-<td>' . $row->nom . '</td>
-<td>' . $row->prenom . '</td>
-<td>' . $row->superficie_totale . '</td>
-<td>
-    <div class="btn-group">
-        <a href="viewproduct.php?id=' . $row->producteur_id . '" class="btn btn-warning btn-xs" role="button"><span class="fa fa-eye" style="color:#ffffff" data-toggle="tooltip" title="Voir Producteur"></span></a>
-        <a href="editproducteur.php?id=' . $row->producteur_id . '" class="btn btn-success btn-xs" role="button"><span class="fa fa-edit" style="color:#ffffff" data-toggle="tooltip" title="Éditer Producteur"></span></a>
+                                                                        while ($row = $select->fetch(PDO::FETCH_OBJ)) {
+                                                                            echo '
+                                    <tr>
+                                    <td>' . $row->producteur_code . '</td>
+                                    <td>' . $row->secteur_name . '</td>
+                                    <td>' . $row->nom . '</td>
+                                    <td>' . $row->prenom . '</td>
+                                    <td>' . $row->superficie_totale . '</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="viewproduct.php?id=' . $row->producteur_id . '" class="btn btn-warning btn-xs" role="button"><span class="fa fa-eye" style="color:#ffffff" data-toggle="tooltip" title="Voir Producteur"></span></a>
+                                            <a href="editproducteur.php?id=' . $row->producteur_id . '" class="btn btn-success btn-xs" role="button"><span class="fa fa-edit" style="color:#ffffff" data-toggle="tooltip" title="Éditer Producteur"></span></a>
 
-        <!-- Utilisation correcte de data-id -->
-        <button data-id="' . $row->producteur_id . '" class="btn btn-danger btn-xs btndelete">
-            <span class="fa fa-trash" style="color:#ffffff" data-toggle="tooltip" title="Supprimer Producteur"></span>
-        </button>
-    </div>
-</td>
-</tr>';
+                                            <!-- Utilisation correcte de data-id -->
+                                            <button data-id="' . $row->producteur_id . '" class="btn btn-danger btn-xs btndelete">
+                                                <span class="fa fa-trash" style="color:#ffffff" data-toggle="tooltip" title="Supprimer Producteur"></span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    </tr>';
 
-                                    }
-                                    ?>
+                                                                        }
+                                                                        ?>
                                 </tbody>
                             </table>
                         </div>
@@ -111,7 +111,7 @@ include_once "footer.php";
 ?>
 
 <script>
-$(document).ready(function () {
+$(document).ready(function() {
     // Initialise le tableau avec DataTables
     $('#table_producteur').DataTable();
 
@@ -119,7 +119,7 @@ $(document).ready(function () {
     $('[data-toggle="tooltip"]').tooltip();
 
     // Gérer la suppression d'un producteur
-    $('.btndelete').click(function () {
+    $('.btndelete').click(function() {
         var tdh = $(this);
         var id = $(this).data("id"); // Récupère l'ID depuis l'attribut 'data-id'
 
@@ -143,7 +143,7 @@ $(document).ready(function () {
                     data: {
                         pidd: id // Envoie l'ID correctement
                     },
-                    success: function (response) {
+                    success: function(response) {
                         // Affiche la réponse du serveur dans la console
                         console.log("Réponse du serveur : ", response);
 
@@ -163,7 +163,7 @@ $(document).ready(function () {
                             );
                         }
                     },
-                    error: function (xhr, status, error) {
+                    error: function(xhr, status, error) {
                         // Affiche les erreurs éventuelles dans la console
                         console.error("Erreur dans la requête AJAX : ", error);
                         console.log("Détails de l'erreur : ", xhr.responseText);
@@ -178,8 +178,6 @@ $(document).ready(function () {
         });
     });
 });
-
-
 </script>
 
 <?php
@@ -195,10 +193,10 @@ include_once 'footer.php';
 
 ?>
 <script>
-    Swal.fire({
-        icon: '<?php echo $_SESSION['status_code']; ?>',
-        title: '<?php echo $_SESSION['status']; ?>'
-    });
+Swal.fire({
+    icon: '<?php echo $_SESSION['status_code']; ?>',
+    title: '<?php echo $_SESSION['status']; ?>'
+});
 </script>
 <?php
 unset($_SESSION['status']);

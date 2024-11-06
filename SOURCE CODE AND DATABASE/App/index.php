@@ -6,65 +6,71 @@ if (isset($_SESSION['useremail'])) {
     if ($_SESSION['useremail'] != '') {
         if ($_SESSION['role'] == 'Admin') {
             header('location: ui/dashboard.php');
-        } elseif ($_SESSION['role'] == 'User') {
+        } elseif ($_SESSION['role'] == 'User' ) {
             header('location: ui/addproduct.php');
+        }elseif ($_SESSION['role'] == 'Middle') { 
+            header('location: ui/addproduct.php'); 
+            exit;
         }
     }
 }
+
 if (isset($_POST['btn_login'])) {
     $useremail = $_POST['txt_email'];
     $password = $_POST['txt_password'];
 
-    $select = $pdo->prepare("select * from tbl_user where useremail='$useremail' AND userpassword='$password'");
+    // Prépare et exécute la requête pour sélectionner l'utilisateur
+    $select = $pdo->prepare("SELECT * FROM tbl_user WHERE useremail = :email AND userpassword = :password");
+    $select->bindParam(':email', $useremail);
+    $select->bindParam(':password', $password);
     $select->execute();
 
     $row = $select->fetch(PDO::FETCH_ASSOC);
-    if (is_array($row)) {
+    if ($row) {
         sendlog(
-          $pdo,
-          'Connexion',
-          $row['username'] . " s'est connecté avec succès",
-          'Succès',
-          $row['userid'],
-          $row['username'],
-          'Connexion',
-          null,
-          null
+            $pdo,
+            'Connexion',
+            $row['username'] . " s'est connecté avec succès",
+            'Succès',
+            $row['userid'],
+            $row['username'],
+            'Connexion',
+            null,
+            null
         );
-        if ($row['useremail'] == $useremail and $row['userpassword'] == $password and $row['role'] == 'Admin') {
-            $_SESSION['status'] = 'Connexion Validée';
-            $_SESSION['status_code'] = 'success';
 
-            header('refresh: 1;ui/dashboard.php');
+        // Configuration des variables de session
+        $_SESSION['userid'] = $row['userid'];
+        $_SESSION['username'] = $row['username'];
+        $_SESSION['useremail'] = $row['useremail'];
+        $_SESSION['role'] = $row['role'];
+        $_SESSION['status'] = 'Connexion Validée';
+        $_SESSION['status_code'] = 'success';
 
-            $_SESSION['userid'] = $row['userid'];
-            $_SESSION['username'] = $row['username'];
-            $_SESSION['useremail'] = $row['useremail'];
-            $_SESSION['role'] = $row['role'];
-        } elseif ($row['useremail'] == $useremail and $row['userpassword'] == $password and $row['role'] == 'User') {
-            $_SESSION['status'] = 'Connexion Validée';
-            $_SESSION['status_code'] = 'success';
-
-            header('refresh: 3;ui/addproduct.php');
-
-            $_SESSION['userid'] = $row['userid'];
-            $_SESSION['username'] = $row['username'];
-            $_SESSION['useremail'] = $row['useremail'];
-            $_SESSION['role'] = $row['role'];
+        if ($row['role'] == 'Admin') {
+            header('refresh: 1; ui/dashboard.php');
+            exit;
+        } elseif ($row['role'] == 'User') {
+            header('refresh: 3; ui/addproduct.php');
+            exit;
+        } elseif ($row['role'] == 'Middle') {
+            header('refresh: 3; ui/dashboard.php'); 
+            exit;
         }
     } else {
+        // Enregistrement de l'échec de la connexion
         sendlog(
-          $pdo,
-          'Connexion',
-          'Tentative de connexion à ' . $useremail . ' échouée',
-          'Échec',
-          null,
-          'N/A',
-          'Connexion',
-          null,
-          null
+            $pdo,
+            'Connexion',
+            'Tentative de connexion à ' . $useremail . ' échouée',
+            'Échec',
+            null,
+            'N/A',
+            'Connexion',
+            null,
+            null
         );
-        // echo $success = "Wrong Email or Password";
+
         $_SESSION['status'] = 'Mot de passe ou email incorrect';
         $_SESSION['status_code'] = 'error';
     }

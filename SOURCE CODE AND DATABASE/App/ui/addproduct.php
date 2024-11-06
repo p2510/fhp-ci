@@ -1,6 +1,8 @@
 <?php
 include_once 'connectdb.php';
 session_start();
+include_once 'guard.php';
+AccessGuard::protectPage('addproduct');
 
 // if ($_SESSION['useremail'] == ""  OR $_SESSION['role'] == "User") { # ATTENDS C'EST SEULEMENT LES ADMINS QUI PEUVENT AJOUTER ?
 if ($_SESSION['useremail'] == "") {
@@ -185,6 +187,7 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
     <link rel="stylesheet" href="./../plugins/sweetalert2/sweetalert2.min.css">
 
     <script>
+    /*
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./service-worker.js')
@@ -195,7 +198,7 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
                     console.log('Échec de l\'enregistrement du Service Worker:', error);
                 });
         });
-    }
+    }*/
     </script>
 </head>
 
@@ -353,6 +356,7 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
                         <div class="container-fluid">
                             <div class="row mb-2">
                                 <div class="col-sm-6">
+                                    <?php    echo(  $_SESSION['role'])   ?>
                                     <h1 class="m-0">Ajouter un Producteur</h1>
                                 </div>
                             </div>
@@ -696,7 +700,7 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
         } else {
             alert(
                 'Aucune connexion Internet détectée. Les données ne peuvent pas être synchronisées.'
-                ); // Alert if no internet
+            ); // Alert if no internet
             connection is detected
         }
     });
