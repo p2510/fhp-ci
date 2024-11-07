@@ -99,9 +99,23 @@
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
-                        <!-- Add icons to the links using the .nav-icon class
-               with font-awesome or any other icon font library -->
+                        <li class="nav-item">
+                            <a href="dashboard.php" class="nav-link">
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                <p>
+                                    Tableau de Bord
+                                </p>
+                            </a>
+                        </li>
                         <li class="nav-header">PRODUCTEURS</li>
+                        <li class="nav-item">
+                            <a href="category.php" class="nav-link">
+                                <i class="nav-icon fas fa-map-pin"></i>
+                                <p>
+                                    Secteurs
+                                </p>
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <a href="addproduct.php" class="nav-link">
                                 <i class="nav-icon fas fa-user"></i>
@@ -136,42 +150,56 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="expirytracker.php" class="nav-link">
-                                <i class="nav-icon fas fa-edit"></i>
+                            <a href="addplantation.php" class="nav-link">
+                                <i class="nav-icon fas fa-plus"></i>
                                 <p>
-                                    Plantation
+                                    Ajouter Plantation
                                 </p>
                             </a>
                         </li>
-                        <!-- <li class="nav-item">
-            <a href="expirytracker.php" class="nav-link">
-            <i class="nav-icon fas fa-credit-card"></i>
-              <p>
-               Information de Paiement
-              </p>
-            </a>
-          </li> -->
+                        <li class="nav-item">
+                            <a href="plantationlist.php" class="nav-link">
+                                <i class="nav-icon fas fa-list"></i>
+                                <p>
+                                    Liste plantation
+                                </p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="paymentInfo.php" class="nav-link">
+                                <i class="nav-icon fas fa-credit-card"></i>
+                                <p>
+                                    Information de Paiement
+                                </p>
+                            </a>
+                        </li>
                         <li class="nav-header">ADMINISTRATION</li>
-                        <!-- <li class="nav-item">
-            <a href="stats.php" class="nav-link">
-            <i class="nav-icon fas fa-chart-bar"></i>
-              <p>
-             Rapport Statistique
-              </p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="registration.php" class="nav-link">
-            <i class="nav-icon far fa-user-plus"></i>
-              <p>Gestion des utilisateurs</p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="logs.php" class="nav-link">
-            <i class="nav-icon far fa-history"></i>
-              <p>Historique des actions</p>
-            </a>
-          </li> -->
+                        <li class="nav-item">
+                            <a href="stats.php" class="nav-link">
+                                <i class="nav-icon fas fa-chart-bar"></i>
+                                <p>
+                                    Rapport Statistique
+                                </p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="registration.php" class="nav-link">
+                                <i class="nav-icon far fa-user-plus"></i>
+                                <p>Gestion des utilisateurs</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="logs.php" class="nav-link">
+                                <i class="nav-icon far fa-history"></i>
+                                <p>Historique des actions</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="trafic.php" class="nav-link">
+                                <i class="nav-icon far fa-history"></i>
+                                <p>Trafic</p>
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <a href="changepassword.php" class="nav-link">
                                 <i class="nav-icon fas fa-user-lock"></i>
@@ -206,7 +234,7 @@
                     // Générer les 7 chiffres aléatoires
                     const randomDigits = Math.floor(1000000 + Math.random() * 9000000);
                     const producteurCode = secteur_code +
-                    randomDigits; // Combine le code secteur et les chiffres aléatoires
+                        randomDigits; // Combine le code secteur et les chiffres aléatoires
 
                     // Mettre à jour la valeur du champ producteur_code pour afficher le code généré
                     document.getElementById('producteur_code').value = producteurCode;

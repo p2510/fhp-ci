@@ -21,7 +21,8 @@ class AccessGuard {
      
 
        if (!isset($_SESSION['role']) || !self::canAccess($_SESSION['role'], $page)) {
-            die("Access denied for role: " . ($_SESSION['role'] ?? 'not set') . " on page: $page");
+        header('location:403.php');
+
         }
     }
 }

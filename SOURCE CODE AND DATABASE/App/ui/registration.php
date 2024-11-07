@@ -2,10 +2,12 @@
 
 include_once 'connectdb.php';
 session_start();
+include_once 'guard.php';
 
-if ($_SESSION['useremail'] == '' or $_SESSION['role'] == 'User') {
+if ($_SESSION['useremail'] == '' ) {
     header('location:../index.php');
 }
+AccessGuard::protectPage('registration');
 
 if ($_SESSION['role'] == 'Admin') {
     include_once 'header.php';

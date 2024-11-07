@@ -2,15 +2,14 @@
 
 include_once 'connectdb.php';
 session_start();
-if ($_SESSION['useremail'] == '' or $_SESSION['role'] == 'User') {
-    header('location:../ui/addproduct.php');
-}
-
+include_once 'guard.php';
+AccessGuard::protectPage('logs');
 if ($_SESSION['role'] == 'Admin') {
     include_once 'header.php';
 } else {
     include_once 'headeruser.php';
 }
+
 
 // sendlog($pdo,
 //   'Consultation',
@@ -137,18 +136,20 @@ error_reporting(0);
 
 
 <script>
-$(document).ready(function () {
+$(document).ready(function() {
     // Initialise le tableau avec DataTables
     $("#table_logs").DataTable({
-      order: [[0, 'desc']],
-      columnDefs: [
-        {
-          target: 4,
-          visible: false
-        }
-      ],
-      "responsive": true, "lengthChange": false, "autoWidth": false,
-      "buttons": ["csv", "excel", "pdf", "colvis"],
+        order: [
+            [0, 'desc']
+        ],
+        columnDefs: [{
+            target: 4,
+            visible: false
+        }],
+        "responsive": true,
+        "lengthChange": false,
+        "autoWidth": false,
+        "buttons": ["csv", "excel", "pdf", "colvis"],
     }).buttons().container().appendTo('#table_logs_wrapper .col-md-6:eq(0)');
 });
 </script>
@@ -166,10 +167,10 @@ include_once 'footer.php';
 
 ?>
 <script>
-    Swal.fire({
-        icon: '<?php echo $_SESSION['status_code']; ?>',
-        title: '<?php echo $_SESSION['status']; ?>'
-    });
+Swal.fire({
+    icon: '<?php echo $_SESSION['status_code']; ?>',
+    title: '<?php echo $_SESSION['status']; ?>'
+});
 </script>
 <?php
 unset($_SESSION['status']);
