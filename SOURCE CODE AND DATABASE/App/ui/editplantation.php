@@ -1,10 +1,12 @@
 <?php
 include_once 'connectdb.php';
 session_start();
+include_once 'guard.php';
 
-if ($_SESSION['useremail'] == "" OR $_SESSION['role'] == "User") {
+if ($_SESSION['useremail'] == "" ) {
     header('location:../index.php');
 }
+AccessGuard::protectPage('editplantation');
 
 if ($_SESSION['role'] == "Admin") {
     include_once 'header.php';
@@ -119,18 +121,21 @@ if (isset($_POST['btnupdate'])) {
                                 <div class="form-row">
                                     <div class="form-group col-md-6">
                                         <label for="txtcode_plantation">Code Plantation</label>
-                                        <input type="text" class="form-control" name="txtcode_plantation" value="<?php echo $code_plantation; ?>" readonly>
+                                        <input type="text" class="form-control" name="txtcode_plantation"
+                                            value="<?php echo $code_plantation; ?>" readonly>
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label for="txtproducteur_code">Code Producteur</label>
-                                        <input type="text" class="form-control" id="txtproducteur_code" name="txtproducteur_code" value="<?php echo $producteur_code; ?>" required>
+                                        <input type="text" class="form-control" id="txtproducteur_code"
+                                            name="txtproducteur_code" value="<?php echo $producteur_code; ?>" required>
                                     </div>
                                 </div>
 
                                 <div class="form-row">
                                     <div class="form-group col-md-6">
                                         <label for="secteur_selector">Secteur</label>
-                                        <select class="form-control" id="secteur_selector" name="txtsecteur_code" required onchange="updateSecteurName()">
+                                        <select class="form-control" id="secteur_selector" name="txtsecteur_code"
+                                            required onchange="updateSecteurName()">
                                             <option value="" disabled>Choisissez un secteur</option>
                                             <?php
                                             $select = $pdo->prepare("SELECT * FROM tbl_secteurs ORDER BY secteur_id");
@@ -143,46 +148,55 @@ if (isset($_POST['btnupdate'])) {
                                         </select>
                                     </div>
                                     <!-- Champ caché pour stocker le nom du secteur sélectionné -->
-                                    <input type="hidden" id="txtsecteur_name" name="txtsecteur_name" value="<?php echo $secteur_name; ?>">
+                                    <input type="hidden" id="txtsecteur_name" name="txtsecteur_name"
+                                        value="<?php echo $secteur_name; ?>">
 
                                     <div class="form-group col-md-6">
                                         <label for="txtdepartement">Département</label>
-                                        <input type="text" class="form-control" name="txtdepartement" value="<?php echo $departement; ?>" required>
+                                        <input type="text" class="form-control" name="txtdepartement"
+                                            value="<?php echo $departement; ?>" required>
                                     </div>
                                 </div>
 
                                 <div class="form-row">
                                     <div class="form-group col-md-6">
                                         <label for="txtsous_prefecture">Sous-Préfecture</label>
-                                        <input type="text" class="form-control" name="txtsous_prefecture" value="<?php echo $sous_prefecture; ?>" required>
+                                        <input type="text" class="form-control" name="txtsous_prefecture"
+                                            value="<?php echo $sous_prefecture; ?>" required>
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label for="txtvillage">Village</label>
-                                        <input type="text" class="form-control" name="txtvillage" value="<?php echo $village; ?>" required>
+                                        <input type="text" class="form-control" name="txtvillage"
+                                            value="<?php echo $village; ?>" required>
                                     </div>
                                 </div>
 
                                 <div class="form-row">
                                     <div class="form-group col-md-6">
                                         <label for="txtsuperficie_hectares">Superficie (ha)</label>
-                                        <input type="number" class="form-control" name="txtsuperficie_hectares" value="<?php echo $superficie_hectares; ?>" step="0.00001" required>
+                                        <input type="number" class="form-control" name="txtsuperficie_hectares"
+                                            value="<?php echo $superficie_hectares; ?>" step="0.00001" required>
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label for="txtproduction_annuelle_estimee">Production Annuelle Estimée</label>
-                                        <input type="number" class="form-control" name="txtproduction_annuelle_estimee" value="<?php echo $production_annuelle_estimee; ?>" step="0.00001" required>
+                                        <input type="number" class="form-control" name="txtproduction_annuelle_estimee"
+                                            value="<?php echo $production_annuelle_estimee; ?>" step="0.00001" required>
                                     </div>
                                 </div>
 
                                 <div class="form-row">
                                     <div class="form-group col-md-6">
                                         <label for="txtannee_plantation">Année de Plantation</label>
-                                        <input type="number" class="form-control" name="txtannee_plantation" value="<?php echo $annee_plantation; ?>" required>
+                                        <input type="number" class="form-control" name="txtannee_plantation"
+                                            value="<?php echo $annee_plantation; ?>" required>
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label for="txtgeolocalise">Géolocalisé</label>
                                         <select class="form-control" name="txtgeolocalise">
-                                            <option value="non" <?php if ($geolocalise == 'non') echo 'selected'; ?>>non</option>
-                                            <option value="oui" <?php if ($geolocalise == 'oui') echo 'selected'; ?>>oui</option>
+                                            <option value="non" <?php if ($geolocalise == 'non') echo 'selected'; ?>>non
+                                            </option>
+                                            <option value="oui" <?php if ($geolocalise == 'oui') echo 'selected'; ?>>oui
+                                            </option>
                                         </select>
                                     </div>
                                 </div>

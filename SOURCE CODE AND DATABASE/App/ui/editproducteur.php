@@ -2,10 +2,14 @@
 ob_start();
 session_start();
 include_once 'connectdb.php';
+include_once 'guard.php';
 
-if ($_SESSION['useremail'] == ""  OR $_SESSION['role'] == "User") {
+if ($_SESSION['useremail'] == "" ) {
     header('location:../index.php');
 }
+AccessGuard::protectPage('editproducteur');
+
+
 
 if ($_SESSION['role'] == "Admin") {
     include_once 'header.php';
@@ -191,170 +195,199 @@ if (isset($_POST['btneditproducteur'])) {
 
 <!-- Formulaire HTML -->
 <div class="content-wrapper">
-  <div class="content-header">
-    <div class="container-fluid">
-      <div class="row mb-2">
-        <div class="col-sm-6">
-          <h1 class="m-0">Modifier Producteur</h1>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="content">
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="card card-primary card-outline">
-            <div class="card-header">
-              <h5 class="m-0">Formulaire de modification du producteur</h5>
-            </div>
-
-            <form action="" method="post" enctype="multipart/form-data" id="producteur-form">
-  <div class="card-body">
-    <div class="row">
-      <!-- Colonne gauche -->
-      <div class="col-md-6">
-        <div class="form-group">
-          <label>Nom</label>
-          <input type="text" class="form-control" name="txtnom" value="<?php echo $nom_db; ?>" required>
-        </div>
-
-        <div class="form-group">
-          <label>Prénom</label>
-          <input type="text" class="form-control" name="txtprenom" value="<?php echo $prenom_db; ?>" required>
-        </div>
-
-        <div class="form-group">
-  <label>Secteur</label>
-  <input type="text" class="form-control" value="<?php echo strtoupper($secteur_name_db) . ' (' . strtoupper($secteur_code_db) . ')'; ?>" readonly>
-  <input type="hidden" name="txtsecteur_name" value="<?php echo $secteur_name_db; ?>">
-  <input type="hidden" name="txtsecteur_code" value="<?php echo $secteur_code_db; ?>">
-</div>
-
-
-                    <div class="form-group">
-                      <label>Département</label>
-                      <input type="text" class="form-control" name="txtdepartement" value="<?php echo $departement_db; ?>" required>
-                    </div>
-
-                    <div class="form-group">
-                      <label>Sous-Préfecture</label>
-                      <input type="text" class="form-control" name="txtsous_prefecture" value="<?php echo $sous_prefecture_db; ?>" required>
-                    </div>
-
-                    <div class="form-group">
-                      <label>Localité</label>
-                      <input type="text" class="form-control" name="txtlocalite" value="<?php echo $localite_db; ?>" required>
-                    </div>
-
-                    <div class="form-group">
-                      <label>Date de naissance</label>
-                      <input type="date" class="form-control" name="txtdate_naissance" value="<?php echo $date_naissance_db; ?>" required>
-                    </div>
-
-                    <div class="form-group">
-                      <label>Lieu de naissance</label>
-                      <input type="text" class="form-control" name="txtlieu_naissance" value="<?php echo $lieu_naissance_db; ?>" required>
-                    </div>
-
-                    <div class="form-group">
-                      <label>Sous-préfecture du lieu de naissance</label>
-                      <input type="text" class="form-control" name="txtsous_pref_naissance" value="<?php echo $sous_pref_naissance_db; ?>" required>
-                    </div>
-
-                    <div class="form-group">
-                      <label>Département du lieu de naissance</label>
-                      <input type="text" class="form-control" name="txtdepartement_naissance" value="<?php echo $departement_naissance_db; ?>" required>
-                    </div>
-                  </div>
-
-                  <!-- Colonne droite -->
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label>Type de pièce d'identité</label>
-                      <select class="form-control" name="txttype_piece_identite" required>
-                        <option value="CNI" <?php if($type_piece_identite_db == 'CNI') echo 'selected'; ?>>CNI</option>
-                        <option value="Passeport" <?php if($type_piece_identite_db == 'Passeport') echo 'selected'; ?>>Passeport</option>
-                        <option value="Permis de conduire" <?php if($type_piece_identite_db == 'Permis de conduire') echo 'selected'; ?>>Permis de conduire</option>
-                      </select>
-                    </div>
-
-                    <div class="form-group">
-                      <label>Numéro de pièce</label>
-                      <input type="text" class="form-control" name="txtnumero_piece" value="<?php echo $numero_piece_db; ?>">
-                    </div>
-
-                    <div class="form-group">
-                      <label>Autre pièce</label>
-                      <input type="text" class="form-control" name="txtautre_piece" value="<?php echo $autre_piece_db; ?>">
-                    </div>
-
-                    <div class="form-group">
-                      <label>Contact Téléphonique</label>
-                      <input type="text" class="form-control" name="txtcontact_telephonique" value="<?php echo $contact_telephonique_db; ?>" required>
-                    </div>
-
-                    <div class="form-group">
-                      <label>Superficie Totale (en hectares)</label>
-                      <input type="number" class="form-control" name="txtsuperficie_totale" step="0.01" value="<?php echo $superficie_totale_db; ?>" required>
-                    </div>
-
-                    <div class="form-group">
-                      <label>Délégué Village</label>
-                      <input type="text" class="form-control" name="txtdelegue_village" value="<?php echo $delegue_village_db; ?>" required>
-                    </div>
-
-                    <div class="form-group">
-                      <label>Photo</label>
-                      <?php if (!empty($photo_db)): ?>
-                          <img src="uploads/<?php echo $photo_db; ?>" alt="Photo actuelle" width="100"><br>
-                      <?php endif; ?>
-                      <input type="file" class="form-control" name="photo" accept="image/*">
-                    </div>
-
-                    <div class="form-group">
-                      <label>Signature</label>
-                      <canvas id="signature-pad" class="signature-pad" width="400" height="200" style="border: 1px solid #000;"></canvas>
-                      <input type="hidden" name="signature" id="signature_image">
-                      <button type="button" id="clear-signature" class="btn btn-warning mt-2">Effacer la signature</button>
-
-                      <?php if (!empty($signature_db)): ?>
-                        <p>Signature actuelle : <img src="signatures/<?php echo $signature_db; ?>" alt="Signature" width="100"></p>
-                      <?php endif; ?>
-                    </div>
-
-                  </div>
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">Modifier Producteur</h1>
                 </div>
-              </div>
-
-              <div class="card-footer">
-                <button type="submit" class="btn btn-primary" name="btneditproducteur">Mettre à jour Producteur</button>
-              </div>
-            </form>
-          </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
+
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card card-primary card-outline">
+                        <div class="card-header">
+                            <h5 class="m-0">Formulaire de modification du producteur</h5>
+                        </div>
+
+                        <form action="" method="post" enctype="multipart/form-data" id="producteur-form">
+                            <div class="card-body">
+                                <div class="row">
+                                    <!-- Colonne gauche -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Nom</label>
+                                            <input type="text" class="form-control" name="txtnom"
+                                                value="<?php echo $nom_db; ?>" required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Prénom</label>
+                                            <input type="text" class="form-control" name="txtprenom"
+                                                value="<?php echo $prenom_db; ?>" required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Secteur</label>
+                                            <input type="text" class="form-control"
+                                                value="<?php echo strtoupper($secteur_name_db) . ' (' . strtoupper($secteur_code_db) . ')'; ?>"
+                                                readonly>
+                                            <input type="hidden" name="txtsecteur_name"
+                                                value="<?php echo $secteur_name_db; ?>">
+                                            <input type="hidden" name="txtsecteur_code"
+                                                value="<?php echo $secteur_code_db; ?>">
+                                        </div>
+
+
+                                        <div class="form-group">
+                                            <label>Département</label>
+                                            <input type="text" class="form-control" name="txtdepartement"
+                                                value="<?php echo $departement_db; ?>" required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Sous-Préfecture</label>
+                                            <input type="text" class="form-control" name="txtsous_prefecture"
+                                                value="<?php echo $sous_prefecture_db; ?>" required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Localité</label>
+                                            <input type="text" class="form-control" name="txtlocalite"
+                                                value="<?php echo $localite_db; ?>" required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Date de naissance</label>
+                                            <input type="date" class="form-control" name="txtdate_naissance"
+                                                value="<?php echo $date_naissance_db; ?>" required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Lieu de naissance</label>
+                                            <input type="text" class="form-control" name="txtlieu_naissance"
+                                                value="<?php echo $lieu_naissance_db; ?>" required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Sous-préfecture du lieu de naissance</label>
+                                            <input type="text" class="form-control" name="txtsous_pref_naissance"
+                                                value="<?php echo $sous_pref_naissance_db; ?>" required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Département du lieu de naissance</label>
+                                            <input type="text" class="form-control" name="txtdepartement_naissance"
+                                                value="<?php echo $departement_naissance_db; ?>" required>
+                                        </div>
+                                    </div>
+
+                                    <!-- Colonne droite -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Type de pièce d'identité</label>
+                                            <select class="form-control" name="txttype_piece_identite" required>
+                                                <option value="CNI"
+                                                    <?php if($type_piece_identite_db == 'CNI') echo 'selected'; ?>>CNI
+                                                </option>
+                                                <option value="Passeport"
+                                                    <?php if($type_piece_identite_db == 'Passeport') echo 'selected'; ?>>
+                                                    Passeport</option>
+                                                <option value="Permis de conduire"
+                                                    <?php if($type_piece_identite_db == 'Permis de conduire') echo 'selected'; ?>>
+                                                    Permis de conduire</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Numéro de pièce</label>
+                                            <input type="text" class="form-control" name="txtnumero_piece"
+                                                value="<?php echo $numero_piece_db; ?>">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Autre pièce</label>
+                                            <input type="text" class="form-control" name="txtautre_piece"
+                                                value="<?php echo $autre_piece_db; ?>">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Contact Téléphonique</label>
+                                            <input type="text" class="form-control" name="txtcontact_telephonique"
+                                                value="<?php echo $contact_telephonique_db; ?>" required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Superficie Totale (en hectares)</label>
+                                            <input type="number" class="form-control" name="txtsuperficie_totale"
+                                                step="0.01" value="<?php echo $superficie_totale_db; ?>" required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Délégué Village</label>
+                                            <input type="text" class="form-control" name="txtdelegue_village"
+                                                value="<?php echo $delegue_village_db; ?>" required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Photo</label>
+                                            <?php if (!empty($photo_db)): ?>
+                                            <img src="uploads/<?php echo $photo_db; ?>" alt="Photo actuelle"
+                                                width="100"><br>
+                                            <?php endif; ?>
+                                            <input type="file" class="form-control" name="photo" accept="image/*">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Signature</label>
+                                            <canvas id="signature-pad" class="signature-pad" width="400" height="200"
+                                                style="border: 1px solid #000;"></canvas>
+                                            <input type="hidden" name="signature" id="signature_image">
+                                            <button type="button" id="clear-signature"
+                                                class="btn btn-warning mt-2">Effacer la signature</button>
+
+                                            <?php if (!empty($signature_db)): ?>
+                                            <p>Signature actuelle : <img src="signatures/<?php echo $signature_db; ?>"
+                                                    alt="Signature" width="100"></p>
+                                            <?php endif; ?>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary" name="btneditproducteur">Mettre à jour
+                                    Producteur</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-  // Initialisation de Signature Pad
-  const signaturePad = new SignaturePad(document.getElementById('signature-pad'));
+document.addEventListener("DOMContentLoaded", function() {
+    // Initialisation de Signature Pad
+    const signaturePad = new SignaturePad(document.getElementById('signature-pad'));
 
-  // Ciblez le formulaire par son ID
-  document.getElementById("producteur-form").addEventListener("submit", function(event) {
-    if (!signaturePad.isEmpty()) {
-      const dataURL = signaturePad.toDataURL();
-      document.getElementById('signature_image').value = dataURL;
-    }
-  });
+    // Ciblez le formulaire par son ID
+    document.getElementById("producteur-form").addEventListener("submit", function(event) {
+        if (!signaturePad.isEmpty()) {
+            const dataURL = signaturePad.toDataURL();
+            document.getElementById('signature_image').value = dataURL;
+        }
+    });
 
-  // Effacer la signature
-  document.getElementById('clear-signature').addEventListener('click', function () {
-    signaturePad.clear();
-  });
+    // Effacer la signature
+    document.getElementById('clear-signature').addEventListener('click', function() {
+        signaturePad.clear();
+    });
 });
 </script>

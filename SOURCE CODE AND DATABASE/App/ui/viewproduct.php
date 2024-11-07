@@ -1,11 +1,14 @@
 <?php
 include_once 'connectdb.php';
 session_start();
-if($_SESSION['useremail']==""  OR $_SESSION['role']=="User"){
+include_once 'guard.php';
+
+if($_SESSION['useremail']==""){
 
   header('location:../index.php');
 
   }
+  AccessGuard::protectPage('viewproduct');
 
 
   if($_SESSION['role']=="Admin"){
@@ -51,40 +54,42 @@ sendlog(
 
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
-  <!-- Content Header (Page header) -->
-  <div class="content-header">
-    <div class="container-fluid">
-      <div class="row mb-2">
-        <div class="col-sm-6">
-          <h1 class="m-0">Fiche Technique du Producteur</h1>
-        </div>
-        <div class="col-sm-6">
-          <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="#">Accueil</a></li>
-            <li class="breadcrumb-item active">Fiche Technique</li>
-          </ol>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Main content -->
-  <div class="content">
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="card card-info card-outline">
-            <div class="card-header">
-              <h5 class="m-0">Détails du Producteur</h5>
-              <!-- Bouton d'impression -->
-<div class="d-flex justify-content-end mb-3">
-    <a href="printbill.php?id=<?php echo $row->producteur_id; ?>" class="btn btn-warning" role="button" target="_blank">
-        <span class="fa fa-print" style="color:#ffffff" data-toggle="tooltip" title="Imprimer la Fiche Technique"> Imprimer Fiche Technique</span>
-    </a>
-</div>
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">Fiche Technique du Producteur</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+                        <li class="breadcrumb-item active">Fiche Technique</li>
+                    </ol>
+                </div>
             </div>
-            <div class="card-body">
-              <?php
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card card-info card-outline">
+                        <div class="card-header">
+                            <h5 class="m-0">Détails du Producteur</h5>
+                            <!-- Bouton d'impression -->
+                            <div class="d-flex justify-content-end mb-3">
+                                <a href="printbill.php?id=<?php echo $row->producteur_id; ?>" class="btn btn-warning"
+                                    role="button" target="_blank">
+                                    <span class="fa fa-print" style="color:#ffffff" data-toggle="tooltip"
+                                        title="Imprimer la Fiche Technique"> Imprimer Fiche Technique</span>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <?php
               $id = $_GET['id'];
 
               $select = $pdo->prepare("SELECT * FROM tbl_producteurs WHERE producteur_id = :id");
@@ -178,23 +183,23 @@ sendlog(
                 </div>';
               }
               ?>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const images = document.querySelectorAll('img');
+document.addEventListener('DOMContentLoaded', function() {
+    const images = document.querySelectorAll('img');
 
-        images.forEach(img => {
-            const originalSrc = img.src;
-            img.src = originalSrc + '?' + new Date().getTime();
-        });
+    images.forEach(img => {
+        const originalSrc = img.src;
+        img.src = originalSrc + '?' + new Date().getTime();
     });
+});
 </script>
 
 <?php

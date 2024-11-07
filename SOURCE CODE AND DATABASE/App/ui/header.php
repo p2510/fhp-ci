@@ -151,15 +151,23 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="plantationlist.php" class="nav-link">
-                                <i class="nav-icon fas fa-edit"></i>
+                            <a href="addplantation.php" class="nav-link">
+                                <i class="nav-icon fas fa-plus"></i>
                                 <p>
-                                    Plantation
+                                    Ajouter Plantation
                                 </p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="expirytracker.php" class="nav-link">
+                            <a href="plantationlist.php" class="nav-link">
+                                <i class="nav-icon fas fa-list"></i>
+                                <p>
+                                    Liste plantation
+                                </p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="paymentInfo.php" class="nav-link">
                                 <i class="nav-icon fas fa-credit-card"></i>
                                 <p>
                                     Information de Paiement
@@ -185,6 +193,12 @@
                             <a href="logs.php" class="nav-link">
                                 <i class="nav-icon far fa-history"></i>
                                 <p>Historique des actions</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="trafic.php" class="nav-link">
+                                <i class="nav-icon far fa-history"></i>
+                                <p>Trafic</p>
                             </a>
                         </li>
                         <li class="nav-item">

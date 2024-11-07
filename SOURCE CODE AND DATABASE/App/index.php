@@ -2,18 +2,7 @@
 include_once 'ui/connectdb.php';
 session_start();
 
-if (isset($_SESSION['useremail'])) {
-    if ($_SESSION['useremail'] != '') {
-        if ($_SESSION['role'] == 'Admin') {
-            header('location: ui/dashboard.php');
-        } elseif ($_SESSION['role'] == 'User' ) {
-            header('location: ui/addproduct.php');
-        }elseif ($_SESSION['role'] == 'Middle') { 
-            header('location: ui/addproduct.php'); 
-            exit;
-        }
-    }
-}
+
 
 if (isset($_POST['btn_login'])) {
     $useremail = $_POST['txt_email'];

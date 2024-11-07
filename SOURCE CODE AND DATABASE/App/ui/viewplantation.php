@@ -1,10 +1,12 @@
 <?php
 include_once 'connectdb.php';
 session_start();
-if ($_SESSION['useremail'] == "" OR $_SESSION['role'] == "User") {
+include_once 'guard.php';
+
+if ($_SESSION['useremail'] == "" ) {
     header('location:../index.php');
 }
-
+AccessGuard::protectPage('viewplantation');
 if ($_SESSION['role'] == "Admin") {
     include_once 'header.php';
 } else {
@@ -56,8 +58,10 @@ if (!$row) {
                             <h5 class="m-0">Détails de la Plantation</h5>
                             <!-- Bouton d'impression -->
                             <div class="d-flex justify-content-end mb-3">
-                                <a href="printplantation.php?id=<?php echo $row->id; ?>" class="btn btn-warning" role="button" target="_blank">
-                                    <span class="fa fa-print" style="color:#ffffff" data-toggle="tooltip" title="Imprimer la Fiche Technique"> Imprimer Fiche Technique</span>
+                                <a href="printplantation.php?id=<?php echo $row->id; ?>" class="btn btn-warning"
+                                    role="button" target="_blank">
+                                    <span class="fa fa-print" style="color:#ffffff" data-toggle="tooltip"
+                                        title="Imprimer la Fiche Technique"> Imprimer Fiche Technique</span>
                                 </a>
                             </div>
                         </div>
@@ -76,7 +80,8 @@ if (!$row) {
                                         </tr>
                                         <tr>
                                             <th>Secteur</th>
-                                            <td><?php echo strtoupper($row->secteur_name) . ' (' . strtoupper($row->secteur_code) . ')'; ?></td>
+                                            <td><?php echo strtoupper($row->secteur_name) . ' (' . strtoupper($row->secteur_code) . ')'; ?>
+                                            </td>
                                         </tr>
                                         <tr>
                                             <th>Département</th>
@@ -123,14 +128,14 @@ if (!$row) {
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const images = document.querySelectorAll('img');
+document.addEventListener('DOMContentLoaded', function() {
+    const images = document.querySelectorAll('img');
 
-        images.forEach(img => {
-            const originalSrc = img.src;
-            img.src = originalSrc + '?' + new Date().getTime();
-        });
+    images.forEach(img => {
+        const originalSrc = img.src;
+        img.src = originalSrc + '?' + new Date().getTime();
     });
+});
 </script>
 
 <?php

@@ -2,13 +2,13 @@
 include_once 'connectdb.php';
 session_start();
 include_once 'guard.php';
-AccessGuard::protectPage('addproduct');
 
-// if ($_SESSION['useremail'] == ""  OR $_SESSION['role'] == "User") { # ATTENDS C'EST SEULEMENT LES ADMINS QUI PEUVENT AJOUTER ?
+
 if ($_SESSION['useremail'] == "") {
   header('location:../index.php');
 }
 
+AccessGuard::protectPage('addproduct');
 // Logique pour l'ajout de producteur
 if (isset($_POST['btnsave'])) {
 // Récupérer les informations du formulaire et les convertir en majuscules
@@ -29,7 +29,7 @@ $autre_piece = strtoupper($_POST['txtautre_piece']);
 $contact_telephonique = $_POST['txtcontact_telephonique']; // Garder le numéro inchangé
 $superficie_totale = $_POST['txtsuperficie_totale']; // Garder la superficie inchangée
 $delegue_village = strtoupper($_POST['txtdelegue_village']);
-    $created_by = $_SESSION['username']; // Récupérer le nom de l'utilisateur connecté
+$created_by = $_SESSION['username']; // Récupérer le nom de l'utilisateur connecté
 
     // Génération du producteur_code
     $random_digits = str_pad(rand(0, 9999999), 7, '0', STR_PAD_LEFT); // Génère un nombre à 7 chiffres
@@ -288,15 +288,23 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="expirytracker.php" class="nav-link">
+                            <a href="addplantation.php" class="nav-link">
                                 <i class="nav-icon fas fa-edit"></i>
                                 <p>
-                                    Plantation
+                                    Ajouter Plantation
                                 </p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="expirytracker.php" class="nav-link">
+                            <a href="plantationlist.php" class="nav-link">
+                                <i class="nav-icon fas fa-edit"></i>
+                                <p>
+                                    Liste Plantation
+                                </p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="paymentInfo.php" class="nav-link">
                                 <i class="nav-icon fas fa-credit-card"></i>
                                 <p>
                                     Information de Paiement
@@ -322,6 +330,12 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
                             <a href="logs.php" class="nav-link">
                                 <i class="nav-icon far fa-history"></i>
                                 <p>Historique des actions</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="trafic.php" class="nav-link">
+                                <i class="nav-icon far fa-history"></i>
+                                <p>Trafic</p>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -356,7 +370,7 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
                         <div class="container-fluid">
                             <div class="row mb-2">
                                 <div class="col-sm-6">
-                                    <?php    echo(  $_SESSION['role'])   ?>
+
                                     <h1 class="m-0">Ajouter un Producteur</h1>
                                 </div>
                             </div>
@@ -378,8 +392,10 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
                                                     <!-- Colonne gauche -->
                                                     <div class="col-md-6">
                                                         <div class="form-group">
+
+
                                                             <label>Secteur</label>
-                                                            <select class="form-control" id="secteur_selector"
+                                                            <select class=" form-control" id="secteur_selector"
                                                                 name="txtsecteur_name" required>
                                                                 <option value="" disabled selected>Choisissez un
                                                                     secteur</option>
@@ -636,9 +652,9 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
             const dataURL = signaturePad.toDataURL(); // Get the signature as a data URL
             document.getElementById('signature_image').value =
                 dataURL; // Set the data URL in a hidden input field
-            alert('jhj'); // Log a message (this might need clarification or removal)
-            event.preventDefault(); // Prevent the form from being sent
-            saveFormOffline(); // Call the function to save the form offline
+            // Log a message (this might need clarification or removal)
+            //event.preventDefault(); // Prevent the form from being sent
+            //saveFormOffline(); // Call the function to save the form offline
         });
 
         // Event listener to clear the signature pad
@@ -701,7 +717,7 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
             alert(
                 'Aucune connexion Internet détectée. Les données ne peuvent pas être synchronisées.'
             ); // Alert if no internet
-            connection is detected
+
         }
     });
 
@@ -712,9 +728,6 @@ $delegue_village = strtoupper($_POST['txtdelegue_village']);
         }
     }, 1800000); // Check every 30 minutes (1800000 milliseconds)
     </script>
-
-    </script>
-
 
 
     <!-- jQuery -->
