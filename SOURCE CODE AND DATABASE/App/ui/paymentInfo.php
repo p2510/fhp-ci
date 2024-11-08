@@ -1,7 +1,7 @@
 <?php
                     include_once 'connectdb.php';
                     session_start();
-include_once 'guard.php';
+                    include_once 'guard.php';
 
 
                     if ($_SESSION['useremail'] == "" ) {
@@ -15,9 +15,7 @@ include_once 'guard.php';
                         include_once 'headeruser.php';
                     }
 
-                    // Génération du code de plantation
-                    $random_digits = str_pad(rand(0, 9999999), 7, '0', STR_PAD_LEFT);
-                    $code_plantation = "PL" . $random_digits;
+              
 
                     // Logique pour l'ajout de plantation
                     if (isset($_POST['btnadd'])) {
@@ -74,7 +72,7 @@ include_once 'guard.php';
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Ajouter une Plantation</h1>
+                    <h1 class="m-0">Ajouter information de paiement</h1>
                 </div>
             </div>
         </div>
@@ -87,7 +85,7 @@ include_once 'guard.php';
                 <div class="col-lg-12 mb-3">
                     <div class="card card-info">
                         <div class="card-header">
-                            <h5 class="m-0">Informations du Producteur</h5>
+                            <h5 class="m-0">Informations de paiement</h5>
                         </div>
 
                     </div>
@@ -97,9 +95,9 @@ include_once 'guard.php';
                 <div class="col-lg-12">
                     <div class="card card-primary card-outline">
                         <div class="card-header">
-                            <h5 class="m-0">Formulaire d'Ajout de Plantation</h5>
+                            <h5 class="m-0">Formulaire d'Ajout de paiement</h5>
                         </div>
-                        <form action="" method="post" onsubmit="return fetchProducerInfo();">
+                        <form action="" method="post" onsubmit="return fetchProducerInfo();" id="payment-form">
                             <div class="card-body">
                                 <div class="form-row">
 
@@ -197,6 +195,8 @@ include_once 'guard.php';
                             <div class="card-footer">
                                 <button type="submit" class="btn btn-primary" name="btnadd">Ajouter</button>
                                 <a href="plantationlist.php" class="btn btn-danger">Annuler</a>
+                                <button type="button" class="btn btn-success " id="synchro">Synchroniser
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -252,4 +252,126 @@ function updateSecteurName() {
     // Mettre à jour le champ caché avec le nom du secteur
     document.getElementById("txtsecteur_name").value = secteurName;
 }
+// Function to save the form data offline when there is no internet connection
+let resultOnline
+
+function saveFormOffline() {
+    const form = document.getElementById('payment-form'); // Get the form element
+    const formData = new FormData(form); // Create a FormData object from the form
+    const data = {}; // Initialize an empty object to store form data
+
+    // Add form data to the object
+    formData.forEach((value, key) => {
+        data[key] = value; // Store each form field in the data object
+    });
+    const offlineFormsPayment = JSON.parse(localStorage.getItem('offlineFormsPayment')) ||
+[]; // Get existing offline forms from localStorage
+    offlineFormsPayment.push(data); // Add the current form data to the array
+    localStorage.setItem('offlineFormsPayment', JSON.stringify(
+        offlineFormsPayment)); // Store the updated array back in localStorage
+
+    alert('Formulaire sauvegardé hors ligne !'); // Alert the user that the form has been saved offline
+
+}
+
+
+// Event listener for when the DOM is fully loaded
+document.addEventListener("DOMContentLoaded", function() {
+
+
+    function getRandomString() {
+        return Math.random().toString(36).substring(2, 15)
+    }
+    async function isOnline() {
+
+        if (!window.navigator.onLine) return false;
+
+
+        // Crée l'URL en ajoutant 'ping.php' au dossier courant
+        const currentUrl = window.location.href;
+        const url = new URL(currentUrl);
+        url.pathname = url.pathname.replace(/[^/]*$/, '') + 'ping.php';
+
+        // Ajoute un paramètre aléatoire pour éviter le cache
+        url.searchParams.set('rand', getRandomString());
+        try {
+            const response = await fetch(url.toString(), {
+                method: 'HEAD'
+            });
+            return response.ok;
+        } catch {
+            return false;
+        }
+    }
+
+    (async function() {
+        resultOnline = await isOnline();
+        console.log("Statut de connexion :", resultOnline);
+    })();
+
+
+    // Event listener for the form submission
+    document.getElementById("payment-form").addEventListener("submit", function(event) {
+
+        if (resultOnline) {
+            console.log('en ligne')
+        } else {
+            event.preventDefault(); // Prevent the form from being sent
+            saveFormOffline(); // Call the function to save the form offline
+            console.log('offfline')
+
+        }
+
+    });
+
+});
+
+// Function to synchronize the offline form data with the server
+async function syncForms() {
+    const offlineFormsPayment = JSON.parse(localStorage.getItem('offlineFormsPayment')) ||
+[]; // Retrieve offline forms from localStorage
+
+    if (offlineFormsPayment.length > 0) { // Check if there are any offline forms to sync
+        try {
+            const response = await fetch('syncFormsPayment.php', { // Send a POST request to syncForms.php
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json' // Set the content type to JSON
+                },
+                body: JSON.stringify(offlineFormsPayment) // Send the offline forms as JSON
+            });
+
+            if (response.ok) { // Check if the response is OK
+                localStorage.removeItem('offlineFormsPayment'); // Clear localStorage after successful sync
+                alert(
+                    'Formulaires synchronisés avec succès !'); // Alert that the forms were successfully synced
+            } else {
+                alert(
+                    'Erreur lors de la synchronisation des formulaires.'); // Alert in case of error during sync
+            }
+        } catch (error) {
+            console.error('Erreur:', error); // Log any errors encountered during the fetch
+        }
+    }
+}
+
+
+// Event listener to check connection and synchronize data on button click
+document.getElementById('synchro').addEventListener('click', function() {
+    if (resultOnline) { // Check if the browser is online
+        alert('Synchronisation des données...'); // Alert the user that synchronization is starting
+        syncForms(); // Call the function to synchronize forms
+    } else {
+        alert(
+            'Aucune connexion Internet détectée. Les données ne peuvent pas être synchronisées.'
+        ); // Alert if no internet
+    }
+});
+
+// Check the connection every 30 minutes
+setInterval(() => {
+    if (resultOnline) { // If online
+        syncForms(); // Synchronize forms if online
+    }
+}, 1800000); // Check every 30 minutes (1800000 milliseconds)
 </script>

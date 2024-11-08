@@ -16,21 +16,29 @@ if ($_SESSION['role'] == "Admin") {
 
 
 sendlog(
-  $pdo,
-  'Consultation',
-  $_SESSION['username'] . " a consulté la liste des délégués",
-  'Succès',
+    $pdo,
+    'Consultation',
+    $_SESSION['username'] . " a consulté la liste des délégués",
+    'Succès',
 
-  $_SESSION['userid'],
-  $_SESSION['username'],
+    $_SESSION['userid'],
+    $_SESSION['username'],
 
-  'Producteur',
-  null,
-  'N/A',
+    'Producteur',
+    null,
+    'N/A',
 );
 
 ?>
-
+<script src="../plugins/chart.js/Chart.min.js"></script>
+<script>
+function generateRandomColor() {
+    const r = Math.floor(Math.random() * 256);
+    const g = Math.floor(Math.random() * 256);
+    const b = Math.floor(Math.random() * 256);
+    return `rgb(${r}, ${g}, ${b})`;
+}
+</script>
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -56,26 +64,28 @@ sendlog(
                             <h5 class="m-0">Les délégués</h5>
                         </div>
                         <div class="card-body">
-                            <table class="table table-striped table-hover" id="table_producteur">
-                                <thead>
-                                    <tr>
-                                        <td>Code Producteur</td>
-                                        <td>Nom Secteur</td>
-                                        <td>Nom</td>
-                                        <td>Prénom</td>
-                                        <td>Superficie Totale</td>
-                                        <td>Action</td>
-                                    </tr>
-                                </thead>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover" id="table_producteur">
+                                    <thead>
+                                        <tr>
+                                            <td>Code Producteur</td>
+                                            <td>Nom Secteur</td>
+                                            <td>Nom</td>
+                                            <td>Prénom</td>
+                                            <td>Superficie Totale</td>
+                                            <td>Action</td>
+                                        </tr>
+                                    </thead>
 
-                                <tbody>
-                                    <?php
-                                    // Remplacez 'tbl_producteurs' par votre table réelle contenant les producteurs
-                                    $select = $pdo->prepare("SELECT * FROM tbl_producteurs WHERE delegue_village='oui' ORDER BY producteur_id ASC");
-                                    $select->execute();
+                                    <tbody>
+                                        <?php
+                                        // Remplacez 'tbl_producteurs' par votre table réelle contenant les producteurs
+                                        $select = $pdo->prepare("SELECT * FROM tbl_producteurs WHERE delegue_village='oui' ORDER BY producteur_id ASC");
+                                        $select->execute();
+                                        $data  = $select;
 
-                                    while ($row = $select->fetch(PDO::FETCH_OBJ)) {
-                                        echo '
+                                        while ($row = $select->fetch(PDO::FETCH_OBJ)) {
+                                            echo '
                                         <tr>
                                         <td>' . $row->producteur_code . '</td>
                                         <td>' . $row->secteur_name . '</td>
@@ -94,14 +104,294 @@ sendlog(
                                             </div>
                                         </td>
                                         </tr>';
+                                        }
+                                        ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
 
-                                    }
-                                    ?>
-                                </tbody>
-                            </table>
+                        <div class="card-footer">
+                            <?php
+                            $query = $pdo->prepare("SELECT * FROM tbl_producteurs WHERE delegue_village='oui'");
+                            $query->execute();
+                            $total = $query->fetchAll();
+                            ?>
+                            <h4>Total : <span><?= count($total) ?></span></h4>
                         </div>
                     </div>
                 </div>
+
+                <div class="col-lg-6">
+                    <div class="card card-danger card-outline">
+                        <div class="card-header">
+                            <h5 class="mb-0">Nombre de producteur inscrit</h5>
+                        </div>
+                        <div class="card-body">
+                            <?php
+                            // Récupération des dates de filtre depuis le formulaire
+                            $startDate = isset($_GET['start_date']) ? $_GET['start_date'] : null;
+                            $endDate = isset($_GET['end_date']) ? $_GET['end_date'] : null;
+
+                            // Construction de la requête SQL avec les filtres de date
+                            $query = "SELECT DATE_FORMAT(`created_at`, '%Y-%m-%d') as created_at, COUNT(*) as total FROM tbl_producteurs";
+                            $params = [];
+
+                            if ($startDate && $endDate) {
+                                $query .= " WHERE `created_at` BETWEEN :start_date AND :end_date";
+                                $params = ['start_date' => $startDate, 'end_date' => $endDate];
+                            } elseif ($startDate) {
+                                $query .= " WHERE `created_at` >= :start_date";
+                                $params = ['start_date' => $startDate];
+                            } elseif ($endDate) {
+                                $query .= " WHERE `created_at` <= :end_date";
+                                $params = ['end_date' => $endDate];
+                            }
+
+                            $query .= " GROUP BY created_at";
+                            $select = $pdo->prepare($query);
+                            $select->execute($params);
+
+                            $ttl = [];
+                            $date = [];
+                            while ($row = $select->fetch(PDO::FETCH_ASSOC)) {
+                                $ttl[] = $row['total'];
+                                $date[] = $row['created_at'];
+                            }
+                            ?>
+                            <form method="GET" action="" class="row">
+                                <div class="col-lg-4">
+                                    <!-- <label for="start_date" class="form-label">Date de début :</label> -->
+                                    <input type="date" id="start_date" class="form-control" name="start_date"
+                                        value="<?php echo isset($_GET['start_date']) ? $_GET['start_date'] : ''; ?>">
+                                </div>
+
+                                <div class="col-lg-4">
+                                    <!-- <label for="end_date" class="form-label">Date de fin :</label> -->
+                                    <input type="date" id="end_date" class="form-control" name="end_date"
+                                        value="<?php echo isset($_GET['end_date']) ? $_GET['end_date'] : ''; ?>">
+                                </div>
+
+                                <div class="col-lg-4">
+                                    <button class="btn btn-primary" type="submit">Filtrer</button>
+                                </div>
+                            </form>
+                            <div>
+                                <canvas id="myProducteurByDate"></canvas>
+                            </div>
+
+                        </div>
+                        <div class="card-footer">
+                            <h4>Total : <span><?= count($ttl) ?></span></h4>
+                        </div>
+                        <script>
+                        const ctx = document.getElementById('myProducteurByDate')
+                        try {
+                            new Chart(ctx, {
+                                type: 'bar',
+                                data: {
+                                    labels: <?php echo json_encode($date); ?>,
+                                    datasets: [{
+                                        label: 'Inscriptions de producteurs',
+                                        backgroundColor: 'rgb(255,99,132)',
+                                        borderColor: 'rgb(255,99,132)',
+                                        data: <?php echo json_encode($ttl); ?>,
+                                        borderWidth: 1
+                                    }]
+                                },
+                                options: {
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true
+                                        }
+                                    }
+                                }
+                            });
+                        } catch (error) {
+                            console.log(error);
+                        }
+                        </script>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <?php
+                    // Récupération des dates de filtre depuis le formulaire
+                    $startDate = isset($_GET['start_date_event']) ? $_GET['start_date_event'] : null;
+                    $endDate = isset($_GET['end_date_event']) ? $_GET['end_date_event'] : null;
+
+                    // Construction de la requête SQL avec les filtres de date
+                    $query = "SELECT DATE_FORMAT(`created_at`, '%Y-%m-%d') as created_at, COUNT(*) as total FROM tbl_events";
+                    $params = [];
+
+                    if ($startDate && $endDate) {
+                        $query .= " WHERE `created_at` BETWEEN :start_date AND :end_date";
+                        $params = ['start_date' => $startDate, 'end_date' => $endDate];
+                    } elseif ($startDate) {
+                        $query .= " WHERE `created_at` >= :start_date";
+                        $params = ['start_date' => $startDate];
+                    } elseif ($endDate) {
+                        $query .= " WHERE `created_at` <= :end_date";
+                        $params = ['end_date' => $endDate];
+                    }
+
+                    $query .= " GROUP BY created_at";
+                    $select = $pdo->prepare($query);
+                    $select->execute($params);
+
+                    $ttl = [];
+                    $date = [];
+                    while ($row = $select->fetch(PDO::FETCH_ASSOC)) {
+                        $ttl[] = $row['total'];
+                        $date[] = $row['created_at'];
+                    }
+                    ?>
+                    <div class="card card-danger card-outline">
+                        <div class="card-header">
+                            <h5 class="mb-0">Nombre d'évènements</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="GET" action="" class="row">
+                                <div class="col-lg-4">
+                                    <!-- <label for="start_date" class="form-label">Date de début :</label> -->
+                                    <input type="date" id="start_date_event" class="form-control"
+                                        name="start_date_event"
+                                        value="<?php echo isset($_GET['start_date_event']) ? $_GET['start_date_event'] : ''; ?>">
+                                </div>
+
+                                <div class="col-lg-4">
+                                    <!-- <label for="end_date" class="form-label">Date de fin :</label> -->
+                                    <input type="date" id="end_date_event" class="form-control" name="end_date_event"
+                                        value="<?php echo isset($_GET['end_date_event']) ? $_GET['end_date_event'] : ''; ?>">
+                                </div>
+
+                                <div class="col-lg-4">
+                                    <button class="btn btn-primary" type="submit">Filtrer</button>
+                                </div>
+                            </form>
+                            <canvas id="myEvents"></canvas>
+                        </div>
+                        <div class="card-footer">
+                            <h4>Total : <span><?= count($ttl) ?></span></h4>
+                        </div>
+                        <script>
+                        const events = document.getElementById('myEvents')
+                        new Chart(events, {
+                            type: "line",
+                            data: {
+                                labels: <?= json_encode($date) ?>,
+                                datasets: [{
+                                    label: 'My First Dataset',
+                                    data: <?= json_encode($ttl) ?>,
+                                    fill: false,
+                                    borderColor: 'rgb(75, 192, 192)',
+                                    tension: 0.1
+                                }]
+                            }
+                        })
+                        </script>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card card-info card-outline">
+                        <div class="card-header">
+                            <h5 class="mb-0">Nombre de plantation par secteur</h5>
+                        </div>
+                        <div class="card-body">
+                            <?php
+                            $query = "SELECT secteur_name AS secteur, COUNT(*) AS total FROM tbl_plantations GROUP BY secteur_name";
+                            $select = $pdo->prepare($query);
+                            $select->execute();
+                            $sect = [];
+                            $data = [];
+
+                            while ($row = $select->fetch(PDO::FETCH_ASSOC)) {
+                                $sect[] = $row['secteur'];
+                                $data[] = $row['total'];
+                            }
+                            ?>
+
+                            <div>
+                                <canvas id="myPlantation"></canvas>
+                            </div>
+                            <script>
+                            const backgroundColorSect = <?= json_encode($sect); ?>.map(() => generateRandomColor());
+                            const plantations = document.getElementById('myPlantation')
+                            new Chart(plantations, {
+                                type: 'doughnut',
+                                data: {
+                                    labels: <?= json_encode($sect); ?>,
+                                    datasets: [{
+                                        label: 'My First Dataset',
+                                        data: <?= json_encode($data); ?>,
+                                        backgroundColor: backgroundColorSect,
+                                        hoverOffset: 4
+                                    }]
+                                }
+                            })
+                            </script>
+                        </div>
+
+                        <div class="card-footer">
+                            <h4>Total : <span><?= count($data) ?></span></h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-12">
+                    <div class="card card-warning card-outline">
+                        <div class="card-header">
+                            <h5 class="mb-0">Nombre de produit par catégorie</h5>
+                        </div>
+                        <div class="card-body">
+                            <?php
+                            $query = "SELECT category AS category, COUNT(*) AS total FROM tbl_product GROUP BY category";
+                            $select = $pdo->prepare($query);
+                            $select->execute();
+                            $cat = [];
+                            $total = [];
+
+                            while ($row = $select->fetch(PDO::FETCH_ASSOC)) {
+                                $cat[] = $row['category'];
+                                $total[] = $row['total'];
+                            }
+                            ?>
+                            <div>
+                                <canvas id="myProduct" style="height: 200px;"></canvas>
+                            </div>
+
+                            <script>
+                            const backgroundColors = <?= json_encode($cat); ?>.map(() => generateRandomColor());
+
+                            const product = document.getElementById('myProduct')
+                            new Chart(product, {
+                                type: 'pie',
+                                data: {
+                                    labels: <?= json_encode($cat); ?>,
+                                    datasets: [{
+                                        label: 'My First Dataset',
+                                        data: <?= json_encode($total); ?>,
+                                        backgroundColor: backgroundColors,
+                                        hoverOffset: 4
+                                    }]
+                                }
+                            })
+                            </script>
+                        </div>
+                        <div class="card-footer">
+                            <h4>Total : <span><?= count($total) ?></span></h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- <div class="col-lg-6">
+                    <div class="card card-success card-outline">
+                        <div class="card-header">
+                            <h5 class="mb-0"></h5>
+                        </div>
+                    </div>
+                </div> -->
 
             </div>
         </div>
@@ -191,9 +481,7 @@ include_once 'footer.php';
 ?>
 
 <?php
-  if(isset($_SESSION['status']) && $_SESSION['status']!='')
-
-  {
+if (isset($_SESSION['status']) && $_SESSION['status'] != '') {
 
 ?>
 <script>
@@ -203,6 +491,6 @@ Swal.fire({
 });
 </script>
 <?php
-unset($_SESSION['status']);
-  }
-  ?>
+    unset($_SESSION['status']);
+}
+?>

@@ -3,20 +3,19 @@ include_once 'connectdb.php';
 session_start();
 include_once 'guard.php';
 
-if($_SESSION['useremail']==""){
+if ($_SESSION['useremail'] == ""  ) {
 
   header('location:../index.php');
+}
+AccessGuard::protectPage('viewproduct');
 
-  }
-  AccessGuard::protectPage('viewproduct');
 
+if ($_SESSION['role'] == "Admin") {
+  include_once 'header.php';
+} else {
 
-  if($_SESSION['role']=="Admin"){
-    include_once'header.php';
-  }else{
-
-    include_once'headeruser.php';
-  }
+  include_once 'headeruser.php';
+}
 
 include 'barcode/barcode128.php';
 
@@ -31,14 +30,14 @@ $select->execute();
 $row = $select->fetch(PDO::FETCH_OBJ);
 
 if (!$row) {
-    echo "<div class='alert alert-danger'>Aucun producteur trouvé avec cet ID.</div>";
-    exit;
+  echo "<div class='alert alert-danger'>Aucun producteur trouvé avec cet ID.</div>";
+  exit;
 }
 
 sendlog(
   $pdo,
   'Consultation',
-  $_SESSION['username'] . " a consulté le producteur N°".$id." - ".$row->nom." ".$row->prenom,
+  $_SESSION['username'] . " a consulté le producteur N°" . $id . " - " . $row->nom . " " . $row->prenom,
   'Succès',
 
   $_SESSION['userid'],
@@ -46,7 +45,7 @@ sendlog(
 
   'Producteur',
   $id,
-  $row->nom." ".$row->prenom,
+  $row->nom . " " . $row->prenom,
 );
 
 ?>
@@ -169,8 +168,18 @@ sendlog(
                     </table>
                   </div>
                   <!-- Section de la photo à droite -->
-                  <div class="col-md-4 text-right" style=" margin-left: 0px";>
+                  <div class="col-md-4 row gap-2">
+                  <div class="col-md-12 text-right" style=" margin-left: 0px";>
                     <img src="uploads/' . $row->photo . '" alt="Photo du Producteur" style="width: 300px; height: 300px; object-fit: cover; border: 2px solid #ccc; margin-left: 20px;">
+                  </div>
+
+                  <div class="col-md-12 text-right" style=" margin-left: 0px";>
+                    <img src="pieces/' . $row->photo_recto . '" alt="Photo du Producteur" style="width: 300px; height: 300px; object-fit: cover; border: 2px solid #ccc; margin-left: 20px;">
+                  </div>
+
+                  <div class="col-md-12 text-right" style=" margin-left: 0px";>
+                    <img src="pieces/' . $row->photo_verso . '" alt="Photo du Producteur" style="width: 300px; height: 300px; object-fit: cover; border: 2px solid #ccc; margin-left: 20px;">
+                  </div>
                   </div>
                 </div>
 

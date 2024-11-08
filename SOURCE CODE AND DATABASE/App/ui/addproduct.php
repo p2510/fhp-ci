@@ -5,31 +5,32 @@ include_once 'guard.php';
 
 
 if ($_SESSION['useremail'] == "") {
-  header('location:../index.php');
+    header('location:../index.php');
 }
-
 AccessGuard::protectPage('addproduct');
+
+
 // Logique pour l'ajout de producteur
 if (isset($_POST['btnsave'])) {
-// Récupérer les informations du formulaire et les convertir en majuscules
-$secteur_code = strtoupper($_POST['txtsecteur_code']);
-$secteur_name = strtoupper($_POST['txtsecteur_name']);
-$departement = strtoupper($_POST['txtdepartement']);
-$sous_prefecture = strtoupper($_POST['txtsous_prefecture']);
-$localite = strtoupper($_POST['txtlocalite']);
-$nom = strtoupper($_POST['txtnom']);
-$prenom = strtoupper($_POST['txtprenom']);
-$date_naissance = $_POST['txtdate_naissance']; // Garder la date inchangée
-$lieu_naissance = strtoupper($_POST['txtlieu_naissance']);
-$sous_pref_naissance = strtoupper($_POST['txtsous_pref_naissance']);
-$departement_naissance = strtoupper($_POST['txtdepartement_naissance']);
-$type_piece_identite = strtoupper($_POST['txttype_piece_identite']);
-$numero_piece = strtoupper($_POST['txtnumero_piece']);
-$autre_piece = strtoupper($_POST['txtautre_piece']);
-$contact_telephonique = $_POST['txtcontact_telephonique']; // Garder le numéro inchangé
-$superficie_totale = $_POST['txtsuperficie_totale']; // Garder la superficie inchangée
-$delegue_village = strtoupper($_POST['txtdelegue_village']);
-$created_by = $_SESSION['username']; // Récupérer le nom de l'utilisateur connecté
+    // Récupérer les informations du formulaire et les convertir en majuscules
+    $secteur_code = strtoupper($_POST['txtsecteur_code']);
+    $secteur_name = strtoupper($_POST['txtsecteur_name']);
+    $departement = strtoupper($_POST['txtdepartement']);
+    $sous_prefecture = strtoupper($_POST['txtsous_prefecture']);
+    $localite = strtoupper($_POST['txtlocalite']);
+    $nom = strtoupper($_POST['txtnom']);
+    $prenom = strtoupper($_POST['txtprenom']);
+    $date_naissance = $_POST['txtdate_naissance']; // Garder la date inchangée
+    $lieu_naissance = strtoupper($_POST['txtlieu_naissance']);
+    $sous_pref_naissance = strtoupper($_POST['txtsous_pref_naissance']);
+    $departement_naissance = strtoupper($_POST['txtdepartement_naissance']);
+    $type_piece_identite = strtoupper($_POST['txttype_piece_identite']);
+    $numero_piece = strtoupper($_POST['txtnumero_piece']);
+    $autre_piece = strtoupper($_POST['txtautre_piece']);
+    $contact_telephonique = $_POST['txtcontact_telephonique']; // Garder le numéro inchangé
+    $superficie_totale = $_POST['txtsuperficie_totale']; // Garder la superficie inchangée
+    $delegue_village = strtoupper($_POST['txtdelegue_village']);
+    $created_by = $_SESSION['username']; // Récupérer le nom de l'utilisateur connecté
 
     // Génération du producteur_code
     $random_digits = str_pad(rand(0, 9999999), 7, '0', STR_PAD_LEFT); // Génère un nombre à 7 chiffres
@@ -40,7 +41,15 @@ $created_by = $_SESSION['username']; // Récupérer le nom de l'utilisateur conn
     $photo_tmp = $_FILES['photo']['tmp_name'];
     $photo_path = "uploads/" . $photo_name; // Assurez-vous que le dossier 'uploads' existe et est accessible en écriture 
 
-    if (move_uploaded_file($photo_tmp, $photo_path)) {
+    $photo_verso_name = "verso" . $producteur_code . ".jpg";
+    $photo_verso_tmp = $_FILES['photo_verso']['tmp_name'];
+    $photo_verso_path = "pieces/" . $photo_verso_name;
+
+    $photo_recto_name = "recto" . $producteur_code . ".jpg";
+    $photo_recto_tmp = $_FILES['photo_recto']['tmp_name'];
+    $photo_recto_path = "pieces/" . $photo_recto_name;
+
+    if (move_uploaded_file($photo_tmp, $photo_path) && move_uploaded_file($photo_recto_tmp, $photo_recto_path) && move_uploaded_file($photo_verso_tmp, $photo_verso_path)) {
         $_SESSION['status'] = "Photo téléchargée avec succès";
     } else {
         $_SESSION['status'] = "Échec du téléchargement de la photo";
@@ -65,23 +74,23 @@ $created_by = $_SESSION['username']; // Récupérer le nom de l'utilisateur conn
         // Enregistrer l'image en tant que fichier PNG
         file_put_contents($signaturePath, $decodedImage);
     } else {
-      $_SESSION['status'] = "Signature manquante";
-      echo "<script>
+        $_SESSION['status'] = "Signature manquante";
+        echo "<script>
               alert('Signature manquante. Vous allez être redirigé vers la page d\'ajout.');
               window.location.href = 'addproduct.php';
             </script>";
-      exit();
+        exit();
     }
 
     // Enregistrement des données du producteur
     $insert = $pdo->prepare("INSERT INTO tbl_producteurs (
         producteur_code, secteur_code, secteur_name, departement, sous_prefecture, localite, nom, prenom, date_naissance,
         lieu_naissance, sous_pref_naissance, departement_naissance, type_piece_identite, numero_piece, autre_piece,
-        contact_telephonique, superficie_totale, delegue_village, photo, signature, created_by)
+        contact_telephonique, superficie_totale, delegue_village, photo, signature, photo_recto, photo_verso, created_by)
         VALUES (
         :producteur_code, :secteur_code, :secteur_name, :departement, :sous_prefecture, :localite, :nom, :prenom, :date_naissance,
         :lieu_naissance, :sous_pref_naissance, :departement_naissance, :type_piece_identite, :numero_piece, :autre_piece,
-        :contact_telephonique, :superficie_totale, :delegue_village, :photo, :signature, :created_by)");
+        :contact_telephonique, :superficie_totale, :delegue_village, :photo, :signature, :photo_recto, :photo_verso ,  :created_by)");
 
     $insert->bindParam(':producteur_code', $producteur_code);
     $insert->bindParam(':secteur_code', $secteur_code);
@@ -103,45 +112,46 @@ $created_by = $_SESSION['username']; // Récupérer le nom de l'utilisateur conn
     $insert->bindParam(':delegue_village', $delegue_village);
     $insert->bindParam(':photo', $photo_name);
     $insert->bindParam(':signature', $signatureFileName); // Enregistrer le nom du fichier signature
+    $insert->bindParam(':photo_recto', $photo_recto_name);
+    $insert->bindParam(':photo_verso', $photo_verso_name);
     $insert->bindParam(':created_by', $created_by);
 
     if ($insert->execute()) {
-      echo "<script>
+        echo "<script>
               alert('Producteur ajouté avec succès');
               window.location.href = 'productlist.php';
             </script>";
-      sendlog(
-        $pdo,
-        'Création',
-        $_SESSION['username'] . " a créé le producteur N°".$pdo->lastInsertId()." - $nom $prenom",
-        'Succès',
+        sendlog(
+            $pdo,
+            'Création',
+            $_SESSION['username'] . " a créé le producteur N°" . $pdo->lastInsertId() . " - $nom $prenom",
+            'Succès',
 
-        $_SESSION['userid'],
-        $_SESSION['username'],
+            $_SESSION['userid'],
+            $_SESSION['username'],
 
-        'Producteur',
-        $pdo->lastInsertId(),
-        "$nom $prenom",
-      );
-      exit();
-  } else {
-      $_SESSION['status'] = "Échec de l'ajout du producteur";
-      $_SESSION['status_code'] = "error";
-      sendlog(
-        $pdo,
-        'Création',
-        $_SESSION['username'] . " n'a pas pu créer le producteur $nom $prenom",
-        'Échec',
+            'Producteur',
+            $pdo->lastInsertId(),
+            "$nom $prenom",
+        );
+        exit();
+    } else {
+        $_SESSION['status'] = "Échec de l'ajout du producteur";
+        $_SESSION['status_code'] = "error";
+        sendlog(
+            $pdo,
+            'Création',
+            $_SESSION['username'] . " n'a pas pu créer le producteur $nom $prenom",
+            'Échec',
 
-        $_SESSION['userid'],
-        $_SESSION['username'],
+            $_SESSION['userid'],
+            $_SESSION['username'],
 
-        'Producteur',
-        null,
-        "$nom $prenom",
-      );
-  }
-
+            'Producteur',
+            null,
+            "$nom $prenom",
+        );
+    }
 }
 ?>
 
@@ -187,7 +197,6 @@ $created_by = $_SESSION['username']; // Récupérer le nom de l'utilisateur conn
     <link rel="stylesheet" href="./../plugins/sweetalert2/sweetalert2.min.css">
 
     <script>
-    /*
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./service-worker.js')
@@ -198,8 +207,9 @@ $created_by = $_SESSION['username']; // Récupérer le nom de l'utilisateur conn
                     console.log('Échec de l\'enregistrement du Service Worker:', error);
                 });
         });
-    }*/
+    }
     </script>
+
 </head>
 
 <body class="hold-transition sidebar-mini">
@@ -234,8 +244,7 @@ $created_by = $_SESSION['username']; // Récupérer le nom de l'utilisateur conn
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
-                        <!-- Add icons to the links using the .nav-icon class
-               with font-awesome or any other icon font library -->
+
 
                         <li class="nav-item">
                             <a href="dashboard.php" class="nav-link">
@@ -289,7 +298,7 @@ $created_by = $_SESSION['username']; // Récupérer le nom de l'utilisateur conn
                         </li>
                         <li class="nav-item">
                             <a href="addplantation.php" class="nav-link">
-                                <i class="nav-icon fas fa-edit"></i>
+                                <i class="nav-icon fas fa-plus"></i>
                                 <p>
                                     Ajouter Plantation
                                 </p>
@@ -297,9 +306,9 @@ $created_by = $_SESSION['username']; // Récupérer le nom de l'utilisateur conn
                         </li>
                         <li class="nav-item">
                             <a href="plantationlist.php" class="nav-link">
-                                <i class="nav-icon fas fa-edit"></i>
+                                <i class="nav-icon fas fa-list"></i>
                                 <p>
-                                    Liste Plantation
+                                    Liste plantation
                                 </p>
                             </a>
                         </li>
@@ -370,7 +379,7 @@ $created_by = $_SESSION['username']; // Récupérer le nom de l'utilisateur conn
                         <div class="container-fluid">
                             <div class="row mb-2">
                                 <div class="col-sm-6">
-
+                                    <?php echo ($_SESSION['role'])   ?>
                                     <h1 class="m-0">Ajouter un Producteur</h1>
                                 </div>
                             </div>
@@ -392,20 +401,18 @@ $created_by = $_SESSION['username']; // Récupérer le nom de l'utilisateur conn
                                                     <!-- Colonne gauche -->
                                                     <div class="col-md-6">
                                                         <div class="form-group">
-
-
                                                             <label>Secteur</label>
-                                                            <select class=" form-control" id="secteur_selector"
+                                                            <select class="form-control" id="secteur_selector"
                                                                 name="txtsecteur_name" required>
                                                                 <option value="" disabled selected>Choisissez un
                                                                     secteur</option>
                                                                 <?php
-                                                                        $select = $pdo->prepare("SELECT * FROM tbl_secteurs ORDER BY secteur_id DESC");
-                                                                        $select->execute();
-                                                                        while ($row = $select->fetch(PDO::FETCH_ASSOC)) {
-                                                                        echo '<option value="' . $row['secteur_name'] . '" data-secteur_code="' . $row['secteur_code'] . '">' . $row['secteur_name'] . '</option>';
-                                                                        }
-                                                                        ?>
+                                                                $select = $pdo->prepare("SELECT * FROM tbl_secteurs ORDER BY secteur_id DESC");
+                                                                $select->execute();
+                                                                while ($row = $select->fetch(PDO::FETCH_ASSOC)) {
+                                                                    echo '<option value="' . $row['secteur_name'] . '" data-secteur_code="' . $row['secteur_code'] . '">' . $row['secteur_name'] . '</option>';
+                                                                }
+                                                                ?>
                                                             </select>
                                                             <input type="hidden" id="txtsecteur_code"
                                                                 name="txtsecteur_code">
@@ -448,6 +455,24 @@ $created_by = $_SESSION['username']; // Récupérer le nom de l'utilisateur conn
                                                             <label>Prénom</label>
                                                             <input type="text" class="form-control" name="txtprenom"
                                                                 placeholder="Entrez le prénom" required>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Contact Téléphonique</label>
+                                                            <input type="text" class="form-control"
+                                                                name="txtcontact_telephonique" required>
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <label>Superficie Totale</label>
+                                                            <input type="number" class="form-control"
+                                                                name="txtsuperficie_totale" step="0.01" required>
+                                                        </div>
+
+
+                                                        <div class="form-group">
+                                                            <label>Délégué Village</label>
+                                                            <input type="text" class="form-control"
+                                                                name="txtdelegue_village" required>
                                                         </div>
                                                     </div>
 
@@ -499,29 +524,24 @@ $created_by = $_SESSION['username']; // Récupérer le nom de l'utilisateur conn
                                                                 name="txtautre_piece">
                                                         </div>
 
-                                                        <div class="form-group">
-                                                            <label>Contact Téléphonique</label>
-                                                            <input type="text" class="form-control"
-                                                                name="txtcontact_telephonique" required>
-                                                        </div>
 
-                                                        <div class="form-group">
-                                                            <label>Superficie Totale</label>
-                                                            <input type="number" class="form-control"
-                                                                name="txtsuperficie_totale" step="0.01" required>
-                                                        </div>
-
-
-                                                        <div class="form-group">
-                                                            <label>Délégué Village</label>
-                                                            <input type="text" class="form-control"
-                                                                name="txtdelegue_village" required>
-                                                        </div>
 
                                                         <div class="form-group">
                                                             <label>Photo</label>
                                                             <input type="file" class="form-control" name="photo"
                                                                 id="photo-input" accept="image/*">
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <label>Photo de la pièce recto</label>
+                                                            <input type="file" class="form-control" name="photo_recto"
+                                                                id="photo-recto" accept="image/*">
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <label>Photo de la pièce verso</label>
+                                                            <input type="file" class="form-control" name="photo_verso"
+                                                                id="photo-verso" accept="image/*">
                                                         </div>
 
                                                         <div class="form-group">
@@ -592,54 +612,112 @@ $created_by = $_SESSION['username']; // Récupérer le nom de l'utilisateur conn
 
     <script>
     // Function to save the form data offline when there is no internet connection
+    let resultOnline
+
     function saveFormOffline() {
         const form = document.getElementById('producteur-form'); // Get the form element
         const formData = new FormData(form); // Create a FormData object from the form
-        const photoInput = document.getElementById('photo-input'); // Get the photo input element
+
+        const photo_input = document.getElementById('photo-input'); // Get the photo input element
+        const photo_recto = document.getElementById('photo-recto'); // Get the photo input element
+        const photo_verso = document.getElementById('photo-verso'); // Get the photo input element
+
         const data = {}; // Initialize an empty object to store form data
 
-        // Check if a photo file is selected
-        if (photoInput.files.length > 0) {
-            const file = photoInput.files[0]; // Get the first file from the input
-            console.log(photoInput.files[0]); // Log the selected file to the console
-            const reader = new FileReader(); // Create a FileReader object
+        // Function to handle file input and convert to Base64
+        function handlePhotoInput(photoInputElement, dataKey) {
+            return new Promise((resolve, reject) => {
+                if (photoInputElement.files.length > 0) {
+                    const file = photoInputElement.files[0]; // Get the first file from the input
+                    console.log(file); // Log the selected file to the console
+                    const reader = new FileReader(); // Create a FileReader object
 
-            // This function is called when the file reading is complete
-            reader.onloadend = function() {
-                // Add the form data to the object
-                formData.forEach((value, key) => {
-                    data[key] = value; // Store each form field in the data object
-                });
+                    // This function is called when the file reading is complete
+                    reader.onloadend = function() {
+                        const base64String = reader.result; // Get the Base64 string from the reader
+                        console.log(base64String); // Log the Base64 string to the console
 
-                const base64String = reader.result; // Get the Base64 string from the reader
-                console.log(base64String); // Log the Base64 string to the console
+                        // Add the photo converted to Base64 to the data object
+                        data[dataKey] = base64String;
+                        resolve(); // Resolve the promise when the photo is ready
+                    };
 
-                // Add the photo converted to Base64 to the data object
-                data['photo'] = base64String;
-                console.log(data['photo']); // Log the photo data to the console
+                    reader.onerror = function(error) {
+                        reject(error); // Reject the promise if there's an error
+                    };
 
-                // Now that the photo is ready, store the data in localStorage
+                    reader.readAsDataURL(file); // Convert the file to Base64
+                } else {
+                    console.log(`Aucune photo sélectionnée pour ${dataKey}.`); // Log if no photo is selected
+                    resolve(); // Resolve immediately if no photo is selected
+                }
+            });
+        }
+
+        // Add form data to the object
+        formData.forEach((value, key) => {
+            data[key] = value; // Store each form field in the data object
+        });
+
+        // Handle the photos in parallel
+        Promise.all([
+                handlePhotoInput(photo_input, 'photo'),
+                handlePhotoInput(photo_recto, 'photo_recto'),
+                handlePhotoInput(photo_verso, 'photo_verso')
+            ])
+            .then(() => {
+                // After all photos are processed, store the form data in localStorage
                 const offlineForms = JSON.parse(localStorage.getItem('offlineForms')) ||
             []; // Get existing offline forms from localStorage
                 offlineForms.push(data); // Add the current form data to the array
                 localStorage.setItem('offlineForms', JSON.stringify(
                     offlineForms)); // Store the updated array back in localStorage
 
-                alert(
-                    'Formulaire sauvegardé hors ligne !'); // Alert the user that the form has been saved offline
+                alert('Formulaire sauvegardé hors ligne !'); // Alert the user that the form has been saved offline
                 form.reset(); // Reset the form for new entries
-            };
-
-            reader.readAsDataURL(file); // Convert the file to Base64
-        } else {
-            console.log("Aucune photo sélectionnée."); // Log a message if no photo is selected
-        }
+            })
+            .catch((error) => {
+                console.error('Erreur lors de la sauvegarde du formulaire hors ligne :', error);
+                alert('Une erreur est survenue. Veuillez réessayer.'); // Show error alert if something goes wrong
+            });
     }
+
 
     // Event listener for when the DOM is fully loaded
     document.addEventListener("DOMContentLoaded", function() {
         const signaturePad = new SignaturePad(document.getElementById(
             'signature-pad')); // Initialize the signature pad
+
+        function getRandomString() {
+            return Math.random().toString(36).substring(2, 15)
+        }
+        async function isOnline() {
+
+            if (!window.navigator.onLine) return false;
+
+
+            // Crée l'URL en ajoutant 'ping.php' au dossier courant
+            const currentUrl = window.location.href;
+            const url = new URL(currentUrl);
+            url.pathname = url.pathname.replace(/[^/]*$/, '') + 'ping.php';
+
+            // Ajoute un paramètre aléatoire pour éviter le cache
+            url.searchParams.set('rand', getRandomString());
+            try {
+                const response = await fetch(url.toString(), {
+                    method: 'HEAD'
+                });
+                return response.ok;
+            } catch {
+                return false;
+            }
+        }
+
+        (async function() {
+            resultOnline = await isOnline();
+            console.log("Statut de connexion :", resultOnline);
+        })();
+
 
         // Event listener for the form submission
         document.getElementById("producteur-form").addEventListener("submit", function(event) {
@@ -652,9 +730,16 @@ $created_by = $_SESSION['username']; // Récupérer le nom de l'utilisateur conn
             const dataURL = signaturePad.toDataURL(); // Get the signature as a data URL
             document.getElementById('signature_image').value =
                 dataURL; // Set the data URL in a hidden input field
-            // Log a message (this might need clarification or removal)
-            //event.preventDefault(); // Prevent the form from being sent
-            //saveFormOffline(); // Call the function to save the form offline
+            console.log(resultOnline)
+            if (resultOnline) {
+                console.log('en ligne')
+            } else {
+                event.preventDefault(); // Prevent the form from being sent
+                saveFormOffline(); // Call the function to save the form offline
+                console.log('offfline')
+
+            }
+
         });
 
         // Event listener to clear the signature pad
@@ -710,24 +795,24 @@ $created_by = $_SESSION['username']; // Récupérer le nom de l'utilisateur conn
 
     // Event listener to check connection and synchronize data on button click
     document.getElementById('synchro').addEventListener('click', function() {
-        if (navigator.onLine) { // Check if the browser is online
+        if (resultOnline) { // Check if the browser is online
             alert('Synchronisation des données...'); // Alert the user that synchronization is starting
             syncForms(); // Call the function to synchronize forms
         } else {
             alert(
                 'Aucune connexion Internet détectée. Les données ne peuvent pas être synchronisées.'
             ); // Alert if no internet
-
         }
     });
 
     // Check the connection every 30 minutes
     setInterval(() => {
-        if (navigator.onLine) { // If online
+        if (resultOnline) { // If online
             syncForms(); // Synchronize forms if online
         }
     }, 1800000); // Check every 30 minutes (1800000 milliseconds)
     </script>
+
 
 
     <!-- jQuery -->
@@ -764,7 +849,6 @@ $created_by = $_SESSION['username']; // Récupérer le nom de l'utilisateur conn
     </script>
     <script src="./../plugins/datatables-buttons/js/buttons.colVis.min.js">
     </script>
-
 
     <!-- SweetAlert2 -->
     <script src="./../plugins/sweetalert2/sweetalert2.min.js">

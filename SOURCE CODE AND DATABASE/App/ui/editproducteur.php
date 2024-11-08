@@ -4,17 +4,14 @@ session_start();
 include_once 'connectdb.php';
 include_once 'guard.php';
 
-if ($_SESSION['useremail'] == "" ) {
-    header('location:../index.php');
+if ($_SESSION['useremail'] == ""  ) {
+  header('location:../index.php');
 }
 AccessGuard::protectPage('editproducteur');
-
-
-
 if ($_SESSION['role'] == "Admin") {
-    include_once 'header.php';
+  include_once 'header.php';
 } else {
-    include_once 'headeruser.php';
+  include_once 'headeruser.php';
 }
 
 $id = $_GET['id'];
@@ -59,137 +56,170 @@ $contact_telephonique_db = $row['contact_telephonique'];
 $superficie_totale_db = $row['superficie_totale'];
 $delegue_village_db = $row['delegue_village'];
 $photo_db = $row['photo']; // Photo existante
+$photo_recto_db = $row['photo_recto'];
+$photo_verso_db = $row['photo_verso'];
 $signature_db = $row['signature']; // Signature existante
 
 if (isset($_POST['btneditproducteur'])) {
-    // Récupérer les informations du formulaire
-    $nom_txt = strtoupper($_POST['txtnom']);
-    $prenom_txt = strtoupper($_POST['txtprenom']);
-    $secteur_name_txt = strtoupper($_POST['txtsecteur_name']);
-    $secteur_code_txt = strtoupper($_POST['txtsecteur_code']);
-    $departement_txt = strtoupper($_POST['txtdepartement']);
-    $sous_prefecture_txt = strtoupper($_POST['txtsous_prefecture']);
-    $localite_txt = strtoupper($_POST['txtlocalite']);
-    $date_naissance_txt = $_POST['txtdate_naissance'];
-    $lieu_naissance_txt = strtoupper($_POST['txtlieu_naissance']);
-    $sous_pref_naissance_txt = strtoupper($_POST['txtsous_pref_naissance']);
-    $departement_naissance_txt = strtoupper($_POST['txtdepartement_naissance']);
-    $type_piece_identite_txt = strtoupper($_POST['txttype_piece_identite']);
-    $numero_piece_txt = strtoupper($_POST['txtnumero_piece']);
-    $autre_piece_txt = strtoupper($_POST['txtautre_piece']);
-    $contact_telephonique_txt = $_POST['txtcontact_telephonique'];
-    $superficie_totale_txt = $_POST['txtsuperficie_totale'];
-    $delegue_village_txt = strtoupper($_POST['txtdelegue_village']);
+  // Récupérer les informations du formulaire
+  $nom_txt = strtoupper($_POST['txtnom']);
+  $prenom_txt = strtoupper($_POST['txtprenom']);
+  $secteur_name_txt = strtoupper($_POST['txtsecteur_name']);
+  $secteur_code_txt = strtoupper($_POST['txtsecteur_code']);
+  $departement_txt = strtoupper($_POST['txtdepartement']);
+  $sous_prefecture_txt = strtoupper($_POST['txtsous_prefecture']);
+  $localite_txt = strtoupper($_POST['txtlocalite']);
+  $date_naissance_txt = $_POST['txtdate_naissance'];
+  $lieu_naissance_txt = strtoupper($_POST['txtlieu_naissance']);
+  $sous_pref_naissance_txt = strtoupper($_POST['txtsous_pref_naissance']);
+  $departement_naissance_txt = strtoupper($_POST['txtdepartement_naissance']);
+  $type_piece_identite_txt = strtoupper($_POST['txttype_piece_identite']);
+  $numero_piece_txt = strtoupper($_POST['txtnumero_piece']);
+  $autre_piece_txt = strtoupper($_POST['txtautre_piece']);
+  $contact_telephonique_txt = $_POST['txtcontact_telephonique'];
+  $superficie_totale_txt = $_POST['txtsuperficie_totale'];
+  $delegue_village_txt = strtoupper($_POST['txtdelegue_village']);
 
-    // Gérer la modification ou conservation de la photo
-    if (!empty($_FILES['photo']['name'])) {
-        $photo_name = $producteur_code_db . '.jpg'; // Nom de la nouvelle photo
-        $photo_tmp = $_FILES['photo']['tmp_name'];
-        $photo_path = "uploads/" . $photo_name;
+  // Gérer la modification ou conservation de la photo
+  if (!empty($_FILES['photo']['name'])) {
+    $photo_name = $producteur_code_db . '.jpg'; // Nom de la nouvelle photo
+    $photo_tmp = $_FILES['photo']['tmp_name'];
+    $photo_path = "uploads/" . $photo_name;
 
-        if (move_uploaded_file($photo_tmp, $photo_path)) {
-            $_SESSION['status'] = "Photo mise à jour avec succès";
-        } else {
-            $_SESSION['status'] = "Échec du téléchargement de la photo";
-        }
+    if (move_uploaded_file($photo_tmp, $photo_path)) {
+      $_SESSION['status'] = "Photo mise à jour avec succès";
     } else {
-        // Garder la photo existante si aucune nouvelle photo n'est uploadée
-        $photo_name = $photo_db;
+      $_SESSION['status'] = "Échec du téléchargement de la photo";
+    }
+  } else {
+    // Garder la photo existante si aucune nouvelle photo n'est uploadée
+    $photo_name = $photo_db;
+  }
+
+  if (!empty($_FILES['photo_recto']['name'])) {
+
+    $photo_recto = 'recto' . $producteur_code_db . '.jpg';
+    $photo_recto_tmp =  $_FILES['photo_recto']['tmp_name'];
+    $photo_recto_path = "pieces/" . $photo_recto;
+
+    if (move_uploaded_file($photo_recto_tmp, $photo_recto_path)) {
+      $_SESSION['status'] = "Photo mise à jour avec succès";
+    } else {
+      $_SESSION['status'] = "Échec du téléchargement de la photo";
+    }
+  } else {
+    $photo_recto = $photo_recto_db;
+  }
+
+  if (!empty($_FILES['photo_verso']['name'])) {
+    $photo_verso = 'verso' . $producteur_code_db . '.jpg';
+    $photo_verso_tmp =  $_FILES['photo_verso']['tmp_name'];
+    $photo_verso_path = "pieces/" . $photo_verso;
+
+    if (move_uploaded_file($photo_verso_tmp, $photo_verso_path)) {
+      $_SESSION['status'] = "Photo mise à jour avec succès";
+    } else {
+      $_SESSION['status'] = "Échec du téléchargement de la photo";
+    }
+  } else {
+    $photo_verso = $photo_verso_db;
+  }
+
+  // Gestion de la signature
+  $signatureDataURL = $_POST['signature']; // Contient la signature en base64
+  if (!empty($signatureDataURL)) {
+    // Extraire la partie base64 de l'image
+    $signatureData = explode(',', $signatureDataURL)[1];
+    $decodedImage = base64_decode($signatureData);
+
+    // Nom du fichier de la signature
+    $signatureFileName = "SIGN_" . $producteur_code_db . ".png";
+    $signaturePath = "signatures/" . $signatureFileName;
+
+    // S'assurer que le dossier 'signatures' existe
+    if (!file_exists('signatures')) {
+      mkdir('signatures', 0777, true); // Créer le dossier s'il n'existe pas
     }
 
-    // Gestion de la signature
-    $signatureDataURL = $_POST['signature']; // Contient la signature en base64
-    if (!empty($signatureDataURL)) {
-        // Extraire la partie base64 de l'image
-        $signatureData = explode(',', $signatureDataURL)[1];
-        $decodedImage = base64_decode($signatureData);
+    // Enregistrer la nouvelle signature
+    file_put_contents($signaturePath, $decodedImage);
+  } else if (isset($_POST['clear_signature'])) {
+    // Si l'utilisateur veut effacer la signature existante
+    $signatureFileName = ""; // Effacer la signature
+  } else {
+    // Garder la signature existante
+    $signatureFileName = $signature_db;
+  }
 
-        // Nom du fichier de la signature
-        $signatureFileName = "SIGN_" . $producteur_code_db . ".png";
-        $signaturePath = "signatures/" . $signatureFileName;
-
-        // S'assurer que le dossier 'signatures' existe
-        if (!file_exists('signatures')) {
-            mkdir('signatures', 0777, true); // Créer le dossier s'il n'existe pas
-        }
-
-        // Enregistrer la nouvelle signature
-        file_put_contents($signaturePath, $decodedImage);
-    } else if (isset($_POST['clear_signature'])) {
-        // Si l'utilisateur veut effacer la signature existante
-        $signatureFileName = ""; // Effacer la signature
-    } else {
-        // Garder la signature existante
-        $signatureFileName = $signature_db;
-    }
-
-    // Mise à jour des informations du producteur
-    $update = $pdo->prepare("UPDATE tbl_producteurs SET
+  // Mise à jour des informations du producteur
+  $update = $pdo->prepare("UPDATE tbl_producteurs SET
         nom = :nom, prenom = :prenom, secteur_name = :secteur_name, secteur_code = :secteur_code,
         departement = :departement, sous_prefecture = :sous_prefecture, localite = :localite,
         date_naissance = :date_naissance, lieu_naissance = :lieu_naissance,
         sous_pref_naissance = :sous_pref_naissance, departement_naissance = :departement_naissance,
         type_piece_identite = :type_piece_identite, numero_piece = :numero_piece, autre_piece = :autre_piece,
         contact_telephonique = :contact_telephonique, superficie_totale = :superficie_totale,
-        delegue_village = :delegue_village, photo = :photo, signature = :signature
+        delegue_village = :delegue_village, photo = :photo, photo_recto = :photo_recto, photo_verso = :photo_verso, signature = :signature
         WHERE producteur_id = :id");
 
-    $update->bindParam(':id', $id);
-    $update->bindParam(':nom', $nom_txt);
-    $update->bindParam(':prenom', $prenom_txt);
-    $update->bindParam(':secteur_name', $secteur_name_txt);
-    $update->bindParam(':secteur_code', $secteur_code_txt);
-    $update->bindParam(':departement', $departement_txt);
-    $update->bindParam(':sous_prefecture', $sous_prefecture_txt);
-    $update->bindParam(':localite', $localite_txt);
-    $update->bindParam(':date_naissance', $date_naissance_txt);
-    $update->bindParam(':lieu_naissance', $lieu_naissance_txt);
-    $update->bindParam(':sous_pref_naissance', $sous_pref_naissance_txt);
-    $update->bindParam(':departement_naissance', $departement_naissance_txt);
-    $update->bindParam(':type_piece_identite', $type_piece_identite_txt);
-    $update->bindParam(':numero_piece', $numero_piece_txt);
-    $update->bindParam(':autre_piece', $autre_piece_txt);
-    $update->bindParam(':contact_telephonique', $contact_telephonique_txt);
-    $update->bindParam(':superficie_totale', $superficie_totale_txt);
-    $update->bindParam(':delegue_village', $delegue_village_txt);
-    $update->bindParam(':photo', $photo_name);
-    $update->bindParam(':signature', $signatureFileName);
+  $update->bindParam(':id', $id);
+  $update->bindParam(':nom', $nom_txt);
+  $update->bindParam(':prenom', $prenom_txt);
+  $update->bindParam(':secteur_name', $secteur_name_txt);
+  $update->bindParam(':secteur_code', $secteur_code_txt);
+  $update->bindParam(':departement', $departement_txt);
+  $update->bindParam(':sous_prefecture', $sous_prefecture_txt);
+  $update->bindParam(':localite', $localite_txt);
+  $update->bindParam(':date_naissance', $date_naissance_txt);
+  $update->bindParam(':lieu_naissance', $lieu_naissance_txt);
+  $update->bindParam(':sous_pref_naissance', $sous_pref_naissance_txt);
+  $update->bindParam(':departement_naissance', $departement_naissance_txt);
+  $update->bindParam(':type_piece_identite', $type_piece_identite_txt);
+  $update->bindParam(':numero_piece', $numero_piece_txt);
+  $update->bindParam(':autre_piece', $autre_piece_txt);
+  $update->bindParam(':contact_telephonique', $contact_telephonique_txt);
+  $update->bindParam(':superficie_totale', $superficie_totale_txt);
+  $update->bindParam(':delegue_village', $delegue_village_txt);
+  $update->bindParam(':photo', $photo_name);
+  $update->bindParam(':photo_recto', $photo_recto);
+  $update->bindParam(':photo_verso', $photo_verso);
+  $update->bindParam(':signature', $signatureFileName);
 
-    if ($update->execute()) {
-      sendlog(
-        $pdo,
-        'Modification',
-        $_SESSION['username'] . " a modifié le producteur N°$id - $nom_txt $prenom_txt",
-        'Succès',
+  if ($update->execute()) {
+    sendlog(
+      $pdo,
+      'Modification',
+      $_SESSION['username'] . " a modifié le producteur N°$id - $nom_txt $prenom_txt",
+      'Succès',
 
-        $_SESSION['userid'],
-        $_SESSION['username'],
+      $_SESSION['userid'],
+      $_SESSION['username'],
 
-        'Producteur',
-        $id,
-        "$nom_txt $prenom_txt",
-      );
-      $_SESSION['status'] = "Producteur mis à jour avec succès";
-      $_SESSION['status_code'] = "success";
-      header('Location: productlist.php');
-      exit();
-    } else {
-        $_SESSION['status'] = "Échec de la mise à jour du producteur";
-        $_SESSION['status_code'] = "error";
-        sendlog(
-          $pdo,
-          'Modification',
-          $_SESSION['username'] . " n'a pas pu modifier le producteur N°$id - $nom_txt $prenom_txt",
-          'Échec',
+      'Producteur',
+      $id,
+      "$nom_txt $prenom_txt",
+    );
+    $_SESSION['status'] = "Producteur mis à jour avec succès";
+    $_SESSION['status_code'] = "success";
+    header('Location: productlist.php');
+    exit();
+  } else {
+    $_SESSION['status'] = "Échec de la mise à jour du producteur";
+    $_SESSION['status_code'] = "error";
+    sendlog(
+      $pdo,
+      'Modification',
+      $_SESSION['username'] . " n'a pas pu modifier le producteur N°$id - $nom_txt $prenom_txt",
+      'Échec',
 
-          $_SESSION['userid'],
-          $_SESSION['username'],
+      $_SESSION['userid'],
+      $_SESSION['username'],
 
-          'Producteur',
-          $id,
-          "$nom_txt $prenom_txt",
-        );
-    }
+      'Producteur',
+      $id,
+      "$nom_txt $prenom_txt",
+    );
+  }
 }
 ?>
 
@@ -292,13 +322,13 @@ if (isset($_POST['btneditproducteur'])) {
                                             <label>Type de pièce d'identité</label>
                                             <select class="form-control" name="txttype_piece_identite" required>
                                                 <option value="CNI"
-                                                    <?php if($type_piece_identite_db == 'CNI') echo 'selected'; ?>>CNI
+                                                    <?php if ($type_piece_identite_db == 'CNI') echo 'selected'; ?>>CNI
                                                 </option>
                                                 <option value="Passeport"
-                                                    <?php if($type_piece_identite_db == 'Passeport') echo 'selected'; ?>>
+                                                    <?php if ($type_piece_identite_db == 'Passeport') echo 'selected'; ?>>
                                                     Passeport</option>
                                                 <option value="Permis de conduire"
-                                                    <?php if($type_piece_identite_db == 'Permis de conduire') echo 'selected'; ?>>
+                                                    <?php if ($type_piece_identite_db == 'Permis de conduire') echo 'selected'; ?>>
                                                     Permis de conduire</option>
                                             </select>
                                         </div>
@@ -340,6 +370,24 @@ if (isset($_POST['btneditproducteur'])) {
                                                 width="100"><br>
                                             <?php endif; ?>
                                             <input type="file" class="form-control" name="photo" accept="image/*">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Photo recto de la pièce</label>
+                                            <?php if (!empty($photo_recto_db)): ?>
+                                            <img src="pieces/<?php echo $photo_recto_db; ?>" alt="Photo actuelle"
+                                                width="100"><br>
+                                            <?php endif; ?>
+                                            <input type="file" class="form-control" name="photo_recto" accept="image/*">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Photo verso de la pièce</label>
+                                            <?php if (!empty($photo_verso_db)): ?>
+                                            <img src="pieces/<?php echo $photo_verso_db; ?>" alt="Photo actuelle"
+                                                width="100"><br>
+                                            <?php endif; ?>
+                                            <input type="file" class="form-control" name="photo_verso" accept="image/*">
                                         </div>
 
                                         <div class="form-group">

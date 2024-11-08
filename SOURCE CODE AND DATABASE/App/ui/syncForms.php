@@ -11,7 +11,7 @@ if (empty($_SESSION['useremail']) || $_SESSION['role'] !== 'Admin') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Decode the JSON data sent by the client
     $data = json_decode(file_get_contents('php://input'), true);
-    
+
     if (!empty($data)) {
         foreach ($data as $form) {
             // Retrieve form information and convert to uppercase
@@ -38,36 +38,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $random_digits = str_pad(rand(0, 9999999), 7, '0', STR_PAD_LEFT); // Generate a 7-digit number
             $producteur_code = $secteur_code . $random_digits; // Combine the secteur_code and random digits
             $photo_name = '';
-
+            $photo_recto = '';
+            $photo_verso = '';
+            //echo json_encode(['photo' =>  $form]);
             // Handle photo upload
-            if (!empty($form['photo'])) {
-                $photoDataURL = $form['photo']; // The photo in base64 with prefix
-                $photoData = explode(',', $photoDataURL)[1]; // Retrieve only the Base64 part
-                $decodedImage = base64_decode($photoData); // Decode the base64 image
+            if (!empty($form['photo']) && !empty($form['photo_recto']) && !empty($form['photo_verso'])) {
+                // Récupération des photos en base64
+                $photoDataURL = $form['photo']; // La photo en base64 avec préfixe
+                $photoRectoURL = $form['photo_recto'];
+                $photoVersoURL = $form['photo_verso'];
+                
+                // Extraction des parties base64 des images
+                $photoData = explode(',', $photoDataURL)[1]; // Extraire uniquement la partie Base64
+                $decodedImage = base64_decode($photoData); // Décoder l'image base64
+                $photoRecto = explode(',', $photoRectoURL)[1];
+                $photoVerso = explode(',', $photoVersoURL)[1];
+                $decodeImageRecto = base64_decode($photoRecto);
+                $decodeImageVerso = base64_decode($photoVerso);
             
-                // Set photo name and path for storage
+                // Définir les noms de fichiers et les chemins pour le stockage
                 $photoFileName = $producteur_code . ".jpg";
                 $photoPath = "uploads/" . $photoFileName;
             
-                // Check if the 'uploads' directory exists, create if not
+                $pieceFileName = $producteur_code . "_recto.jpg"; // Ajout du suffixe pour recto
+                $piecePath = "pieces/" . $pieceFileName;
+            
+                $pieceFileVersoName = $producteur_code . "_verso.jpg"; // Ajout du suffixe pour verso
+                $pieceVersoPath = "pieces/" . $pieceFileVersoName;
+            
+                // Vérifier si les répertoires 'uploads' et 'pieces' existent, sinon les créer
                 if (!file_exists('uploads')) {
                     mkdir('uploads', 0777, true);
                 }
             
-                // Save the image on the server
-                if (file_put_contents($photoPath, $decodedImage) !== false) {
-                    $_SESSION['status'] = "Photo uploaded and saved successfully.";
-                    $photo_name = $photoFileName; // Store the photo file name
-                    echo json_encode(['status' => 'success', 'message' => 'Photo saved successfully.']);
+                if (!file_exists('pieces')) {
+                    mkdir('pieces', 0777, true);
+                }
+            
+                // Sauvegarder les images sur le serveur
+                if (
+                    file_put_contents($photoPath, $decodedImage) !== false &&
+                    file_put_contents($piecePath, $decodeImageRecto) !== false &&
+                    file_put_contents($pieceVersoPath, $decodeImageVerso) !== false
+                ) {
+                    $_SESSION['status'] = "Photos téléchargées et sauvegardées avec succès.";
+                    $photo_name = $photoFileName; // Nom du fichier photo
+                    $photo_recto = $pieceFileName; // Nom du fichier photo recto
+                    $photo_verso = $pieceFileVersoName; // Nom du fichier photo verso
+                    echo json_encode(['status' => 'success', 'message' => 'Photos sauvegardées avec succès.']);
                 } else {
-                    $_SESSION['status'] = "Failed to save the photo.";
-                    echo json_encode(['status' => 'error', 'message' => "Failed to save the photo."]);
+                    $_SESSION['status'] = "Échec de la sauvegarde des photos.";
+                    echo json_encode(['status' => 'error', 'message' => "Échec de la sauvegarde des photos."]);
                 }
             } else {
-                $_SESSION['status'] = "Missing photo.";
-                echo json_encode(['status' => 'error', 'message' => 'Missing photo.']);
+                $_SESSION['status'] = "Photos manquantes.";
+                echo json_encode(['status' => 'error', 'message' => 'Photos manquantes.']);
             }
             
+
             // Handle signature upload
             $signatureDataURL = $form['signature']; // Contains the signature in base64
             if (!empty($signatureDataURL)) {
@@ -96,11 +124,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare("INSERT INTO tbl_producteurs (
                 producteur_code, secteur_code, secteur_name, departement, sous_prefecture, localite, nom, prenom, date_naissance,
                 lieu_naissance, sous_pref_naissance, departement_naissance, type_piece_identite, numero_piece, autre_piece,
-                contact_telephonique, superficie_totale, delegue_village, photo, signature, created_by
+                contact_telephonique, superficie_totale, delegue_village, photo,photo_recto,photo_verso, signature, created_by
             ) VALUES (
                 :producteur_code, :secteur_code, :secteur_name, :departement, :sous_prefecture, :localite, :nom, :prenom, :date_naissance,
                 :lieu_naissance, :sous_pref_naissance, :departement_naissance, :type_piece_identite, :numero_piece, :autre_piece,
-                :contact_telephonique, :superficie_totale, :delegue_village, :photo, :signature, :created_by
+                :contact_telephonique, :superficie_totale, :delegue_village, :photo,:photo_recto, :photo_verso, :signature, :created_by
             )");
 
             // Bind parameters to the query
@@ -123,6 +151,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bindParam(':superficie_totale', $superficie_totale);
             $stmt->bindParam(':delegue_village', $delegue_village);
             $stmt->bindParam(':photo', $photo_name);
+            $stmt->bindParam(':photo_recto', $photo_recto);
+            $stmt->bindParam(':photo_verso', $photo_verso);
             $stmt->bindParam(':signature', $signatureFileName); // Save the signature file name
             $stmt->bindParam(':created_by', $created_by);
 
@@ -132,7 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 sendlog(
                     $pdo,
                     'Creation',
-                    $_SESSION['username'] . " created producer No. ".$pdo->lastInsertId()." - $nom $prenom",
+                    $_SESSION['username'] . " created producer No. " . $pdo->lastInsertId() . " - $nom $prenom",
                     'Success',
                     $_SESSION['userid'],
                     $_SESSION['username'],
@@ -161,4 +191,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 } else {
     echo json_encode(['status' => 'error', 'message' => 'Invalid request']); // Invalid request
 }
-?>
