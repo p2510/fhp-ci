@@ -1,6 +1,8 @@
 const CACHE_NAME = 'my-cache-v1';
 const urlsToCache = [
     './addproduct.php',
+    './editproducteur.php',
+    './productlist.php',
     './addplantation.php',
     './paymentInfo.php',
     './icons/icon-192.png',

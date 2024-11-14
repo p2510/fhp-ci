@@ -209,7 +209,6 @@ if (isset($_POST['btnsave'])) {
         });
     }
     </script>
-
 </head>
 
 <body class="hold-transition sidebar-mini">
